@@ -170,100 +170,144 @@ When activated:
 
 ## 🧩 File Structure
 
-pax-support-pro/
-├── 📁 admin/
-│   ├── 📁 views/
-│   │   ├── dashboard.php
-│   │   ├── tickets-list.php
-│   │   ├── ticket-details.php
-│   │   ├── departments.php
-│   │   └── settings.php
-│   ├── 📁 classes/
-│   │   ├── class-admin-dashboard.php
-│   │   ├── class-tickets-manager.php
-│   │   ├── class-departments-handler.php
-│   │   └── class-settings-page.php
-│   ├── 📁 assets/
-│   │   ├── css/
-│   │   │   ├── admin.min.css
-│   │   │   └── responsive.css
-│   │   └── js/
-│   │       ├── admin.min.js
-│   │       └── chart.js
-│   └── admin-init.php
-├── 📁 public/
-│   ├── 📁 views/
-│   │   ├── ticket-form.php
-│   │   ├── my-tickets.php
-│   │   ├── ticket-view.php
-│   │   └── knowledge-base.php
-│   ├── 📁 classes/
-│   │   ├── class-ticket-submission.php
-│   │   ├── class-user-tickets.php
-│   │   └── class-frontend-ui.php
-│   ├── 📁 assets/
-│   │   ├── css/
-│   │   │   ├── public.min.css
-│   │   │   └── modal.css
-│   │   └── js/
-│   │       ├── public.min.js
-│   │       ├── ajax-handler.js
-│   │       └── file-upload.js
-│   └── public-init.php
-├── 📁 includes/
-│   ├── 📁 core/
-│   │   ├── class-core.php
-│   │   ├── class-database.php
-│   │   ├── class-security.php
-│   │   ├── class-validator.php
-│   │   └── class-logger.php
-│   ├── 📁 models/
-│   │   ├── class-ticket.php
-│   │   ├── class-department.php
-│   │   ├── class-reply.php
-│   │   ├── class-attachment.php
-│   │   └── class-user.php
-│   ├── 📁 utils/
-│   │   ├── helpers.php
-│   │   ├── template-loader.php
-│   │   ├── file-uploader.php
-│   │   └── email-notifications.php
-│   └── loader.php
-├── 📁 api/
-│   ├── 📁 v1/
-│   │   ├── class-tickets-controller.php
-│   │   ├── class-departments-controller.php
-│   │   ├── class-users-controller.php
-│   │   └── class-reports-controller.php
-│   ├── 📁 middleware/
-│   │   ├── class-auth.php
-│   │   ├── class-permissions.php
-│   │   └── class-rate-limit.php
-│   └── rest-init.php
-├── 📁 assets/
-│   ├── 📁 dist/
-│   ├── 📁 src/
-│   └── 📁 vendor/
-├── 📁 languages/
-│   ├── pax-support-pro.pot
-│   ├── ar.mo
-│   ├── ar.po
-│   ├── en.mo
-│   └── en.po
-├── 📁 tests/
-│   ├── unit/
-│   ├── integration/
-│   └── bootstrap.php
-├── 📁 vendor/ (Composer dependencies)
-├── 📁 templates/
-│   ├── email/
-│   ├── pdf/
-│   └── html/
-├── 📄 pax-support-pro.php الرئيسي)
-├── 📄 uninstall.php
-├── 📄 composer.json
-├── 📄 package.json
-└── 📄 README.md 
+pax-core-suite/
+│
+├── bootstrap/
+│   ├── autoload.php
+│   ├── kernel.php
+│   └── init-hooks.php
+│
+├── app/
+│   ├── Console/
+│   │   ├── Commands/
+│   │   │   ├── SyncTickets.php
+│   │   │   ├── CleanLogs.php
+│   │   │   └── UpdateAIModel.php
+│   │   └── Kernel.php
+│   ├── Events/
+│   │   ├── TicketCreated.php
+│   │   ├── ChatMessageReceived.php
+│   │   └── SystemHealthCheck.php
+│   ├── Exceptions/
+│   │   ├── Handler.php
+│   │   └── InvalidPayloadException.php
+│   ├── Http/
+│   │   ├── Controllers/
+│   │   │   ├── Api/
+│   │   │   │   ├── TicketController.php
+│   │   │   │   ├── AIController.php
+│   │   │   │   └── UserController.php
+│   │   │   └── Web/
+│   │   │       ├── DashboardController.php
+│   │   │       └── SettingsController.php
+│   │   ├── Middleware/
+│   │   │   ├── Authenticate.php
+│   │   │   ├── VerifyCsrfToken.php
+│   │   │   └── Localize.php
+│   │   └── Routes/
+│   │       ├── api.php
+│   │       └── web.php
+│   ├── Models/
+│   │   ├── Ticket.php
+│   │   ├── User.php
+│   │   ├── Setting.php
+│   │   └── AI_Log.php
+│   ├── Services/
+│   │   ├── AI/
+│   │   │   ├── Engine.php
+│   │   │   ├── NLPAdapter.php
+│   │   │   ├── PromptManager.php
+│   │   │   └── SentimentAnalyzer.php
+│   │   ├── Cache/
+│   │   │   ├── RedisCache.php
+│   │   │   └── TransientCache.php
+│   │   ├── Notifications/
+│   │   │   ├── EmailNotifier.php
+│   │   │   ├── SlackNotifier.php
+│   │   │   └── WebhookNotifier.php
+│   │   └── Security/
+│   │       ├── Encryption.php
+│   │       ├── Firewall.php
+│   │       └── AccessControl.php
+│   └── Support/
+│       ├── Helpers.php
+│       ├── Arr.php
+│       ├── Str.php
+│       └── Validator.php
+│
+├── config/
+│   ├── ai.php
+│   ├── app.php
+│   ├── cache.php
+│   ├── database.php
+│   ├── logging.php
+│   ├── mail.php
+│   └── security.php
+│
+├── database/
+│   ├── migrations/
+│   │   ├── 2025_10_01_create_tickets_table.php
+│   │   ├── 2025_10_01_create_ai_logs_table.php
+│   │   └── 2025_10_01_create_settings_table.php
+│   ├── seeders/
+│   │   ├── DemoUserSeeder.php
+│   │   └── DefaultSettingsSeeder.php
+│   └── factories/
+│       └── TicketFactory.php
+│
+├── resources/
+│   ├── views/
+│   │   ├── layouts/
+│   │   │   ├── master.blade.php
+│   │   │   └── auth.blade.php
+│   │   ├── dashboard/
+│   │   │   ├── index.blade.php
+│   │   │   └── analytics.blade.php
+│   │   ├── chat/
+│   │   │   ├── widget.blade.php
+│   │   │   └── conversation.blade.php
+│   │   └── emails/
+│   │       └── ticket-notification.blade.php
+│   ├── lang/
+│   │   ├── en/
+│   │   │   └── messages.php
+│   │   ├── ar/
+│   │   │   └── messages.php
+│   │   └── de/
+│   │       └── messages.php
+│   ├── css/
+│   ├── js/
+│   └── images/
+│
+├── tests/
+│   ├── Feature/
+│   │   ├── ApiTest.php
+│   │   ├── AITest.php
+│   │   └── AuthTest.php
+│   └── Unit/
+│       ├── EncryptionTest.php
+│       ├── ModelTest.php
+│       └── CacheTest.php
+│
+├── scripts/
+│   ├── deploy.sh
+│   ├── clear-cache.sh
+│   ├── optimize.sh
+│   └── monitor.php
+│
+├── storage/
+│   ├── logs/
+│   │   └── system.log
+│   ├── cache/
+│   └── ai-models/
+│
+├── vendor/
+│
+├── composer.json
+├── pax-core-suite.php
+├── README.md
+└── LICENSE
+
 
 
 
