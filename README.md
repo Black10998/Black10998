@@ -1,6 +1,6 @@
 # PAX Support Pro
 
-**PAX Support Pro** — a next-generation smart WordPress support system integrating **AI assistance**, **live chat**, **tickets**, **callbacks**, and **auto-updating automation**.
+**PAX Support Pro**  a next-generation smart WordPress support system integrating **AI assistance**, **live chat**, **tickets**, **callbacks**, and **auto-updating automation**.
 
 A full-featured plugin for modern support centers, built for speed, stability, and dynamic control.
 
@@ -27,7 +27,7 @@ A full-featured plugin for modern support centers, built for speed, stability, a
 - Dynamic chat launcher with **glass-neon design**.
 - All menu buttons fully functional:
   - Chat, New Ticket, Help Center, Troubleshooter, Diagnostics, Callback, Order Lookup, My Requests, Feedback, Donate, Server Status.
-- Menu is **fully customizable** — admin can:
+- Menu is **fully customizable**  admin can:
   - Add, rename, reorder, or remove buttons.
   - Assign custom icons (emoji/SVG) and URLs.
   - Control visibility (user/admin/both).
@@ -171,30 +171,100 @@ When activated:
 ## 🧩 File Structure
 
 pax-support-pro/
-│
-├── admin/
-│ ├── admin-settings.php
-│ ├── admin-console.php
-│ └── admin-dashboard.php
-│
-├── includes/
-│ ├── helpers.php
-│ ├── options.php
-│ └── updater.php
-│
-├── frontend/
-│ ├── chat-ui.php
-│ ├── scheduler-ui.php
-│ └── knowledge-base-ui.php
-│
-├── assets/
-│ ├── js/chat-launcher.js
-│ └── css/chat-style.css
-│
-├── rest/
-│ └── callback.php
-│
-└── pax-support-pro.php
+├── 📁 admin/
+│   ├── 📁 views/
+│   │   ├── dashboard.php
+│   │   ├── tickets-list.php
+│   │   ├── ticket-details.php
+│   │   ├── departments.php
+│   │   └── settings.php
+│   ├── 📁 classes/
+│   │   ├── class-admin-dashboard.php
+│   │   ├── class-tickets-manager.php
+│   │   ├── class-departments-handler.php
+│   │   └── class-settings-page.php
+│   ├── 📁 assets/
+│   │   ├── css/
+│   │   │   ├── admin.min.css
+│   │   │   └── responsive.css
+│   │   └── js/
+│   │       ├── admin.min.js
+│   │       └── chart.js
+│   └── admin-init.php
+├── 📁 public/
+│   ├── 📁 views/
+│   │   ├── ticket-form.php
+│   │   ├── my-tickets.php
+│   │   ├── ticket-view.php
+│   │   └── knowledge-base.php
+│   ├── 📁 classes/
+│   │   ├── class-ticket-submission.php
+│   │   ├── class-user-tickets.php
+│   │   └── class-frontend-ui.php
+│   ├── 📁 assets/
+│   │   ├── css/
+│   │   │   ├── public.min.css
+│   │   │   └── modal.css
+│   │   └── js/
+│   │       ├── public.min.js
+│   │       ├── ajax-handler.js
+│   │       └── file-upload.js
+│   └── public-init.php
+├── 📁 includes/
+│   ├── 📁 core/
+│   │   ├── class-core.php
+│   │   ├── class-database.php
+│   │   ├── class-security.php
+│   │   ├── class-validator.php
+│   │   └── class-logger.php
+│   ├── 📁 models/
+│   │   ├── class-ticket.php
+│   │   ├── class-department.php
+│   │   ├── class-reply.php
+│   │   ├── class-attachment.php
+│   │   └── class-user.php
+│   ├── 📁 utils/
+│   │   ├── helpers.php
+│   │   ├── template-loader.php
+│   │   ├── file-uploader.php
+│   │   └── email-notifications.php
+│   └── loader.php
+├── 📁 api/
+│   ├── 📁 v1/
+│   │   ├── class-tickets-controller.php
+│   │   ├── class-departments-controller.php
+│   │   ├── class-users-controller.php
+│   │   └── class-reports-controller.php
+│   ├── 📁 middleware/
+│   │   ├── class-auth.php
+│   │   ├── class-permissions.php
+│   │   └── class-rate-limit.php
+│   └── rest-init.php
+├── 📁 assets/
+│   ├── 📁 dist/
+│   ├── 📁 src/
+│   └── 📁 vendor/
+├── 📁 languages/
+│   ├── pax-support-pro.pot
+│   ├── ar.mo
+│   ├── ar.po
+│   ├── en.mo
+│   └── en.po
+├── 📁 tests/
+│   ├── unit/
+│   ├── integration/
+│   └── bootstrap.php
+├── 📁 vendor/ (Composer dependencies)
+├── 📁 templates/
+│   ├── email/
+│   ├── pdf/
+│   └── html/
+├── 📄 pax-support-pro.php الرئيسي)
+├── 📄 uninstall.php
+├── 📄 composer.json
+├── 📄 package.json
+└── 📄 README.md 
+
 
 
 ---
