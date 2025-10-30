@@ -43,6 +43,64 @@ function pax_sup_default_options() {
         'backup_local_enabled'   => 1,
         'backup_google_drive'    => 0,
         'backup_dropbox'         => 0,
+        'chat_menu_items'        => pax_sup_default_menu_items(),
+    );
+}
+
+function pax_sup_default_menu_items() {
+    return array(
+        'chat' => array(
+            'label'   => __( 'Open Chat', 'pax-support-pro' ),
+            'visible' => 1,
+        ),
+        'ticket' => array(
+            'label'   => __( 'New Ticket', 'pax-support-pro' ),
+            'visible' => 1,
+        ),
+        'help' => array(
+            'label'   => __( 'Help Center', 'pax-support-pro' ),
+            'visible' => 1,
+        ),
+        'speed' => array(
+            'label'   => __( 'Super Speed', 'pax-support-pro' ),
+            'visible' => 1,
+        ),
+        'agent' => array(
+            'label'   => __( 'Live Agent', 'pax-support-pro' ),
+            'visible' => 1,
+        ),
+        'whatsnew' => array(
+            'label'   => __( 'What\'s New', 'pax-support-pro' ),
+            'visible' => 1,
+        ),
+        'troubleshooter' => array(
+            'label'   => __( 'Troubleshooter', 'pax-support-pro' ),
+            'visible' => 1,
+        ),
+        'diag' => array(
+            'label'   => __( 'Diagnostics', 'pax-support-pro' ),
+            'visible' => 1,
+        ),
+        'callback' => array(
+            'label'   => __( 'Request a Callback', 'pax-support-pro' ),
+            'visible' => 1,
+        ),
+        'order' => array(
+            'label'   => __( 'Order Lookup', 'pax-support-pro' ),
+            'visible' => 1,
+        ),
+        'myreq' => array(
+            'label'   => __( 'My Request', 'pax-support-pro' ),
+            'visible' => 1,
+        ),
+        'feedback' => array(
+            'label'   => __( 'Feedback', 'pax-support-pro' ),
+            'visible' => 1,
+        ),
+        'donate' => array(
+            'label'   => __( 'Donate', 'pax-support-pro' ),
+            'visible' => 1,
+        ),
     );
 }
 

@@ -266,6 +266,25 @@ function pax_sup_render_settings() {
     if ( 'POST' === $_SERVER['REQUEST_METHOD'] && check_admin_referer( 'pax_sup_save_settings' ) ) {
         $input = wp_unslash( $_POST );
 
+        // Process chat menu items
+        $menu_items = array();
+        $default_menu = pax_sup_default_menu_items();
+        
+        if ( ! empty( $input['menu_items'] ) && is_array( $input['menu_items'] ) ) {
+            foreach ( $default_menu as $key => $default_item ) {
+                if ( isset( $input['menu_items'][ $key ] ) ) {
+                    $menu_items[ $key ] = array(
+                        'label'   => sanitize_text_field( $input['menu_items'][ $key ]['label'] ?? $default_item['label'] ),
+                        'visible' => ! empty( $input['menu_items'][ $key ]['visible'] ) ? 1 : 0,
+                    );
+                } else {
+                    $menu_items[ $key ] = $default_item;
+                }
+            }
+        } else {
+            $menu_items = $default_menu;
+        }
+
         $new = array(
             'enabled'              => ! empty( $input['enabled'] ) ? 1 : 0,
             'enable_chat'          => ! empty( $input['enable_chat'] ) ? 1 : 0,
@@ -298,6 +317,7 @@ function pax_sup_render_settings() {
             'backup_local_enabled'   => ! empty( $input['backup_local_enabled'] ) ? 1 : 0,
             'backup_google_drive'    => ! empty( $input['backup_google_drive'] ) ? 1 : 0,
             'backup_dropbox'         => ! empty( $input['backup_dropbox'] ) ? 1 : 0,
+            'chat_menu_items'        => $menu_items,
         );
 
         pax_sup_update_options( $new );
@@ -460,6 +480,55 @@ function pax_sup_render_settings() {
                     <th scope="row"><?php esc_html_e( 'Ticket Cooldown (days)', 'pax-support-pro' ); ?></th>
                     <td><input type="number" min="0" name="ticket_cooldown_days" value="<?php echo intval( $options['ticket_cooldown_days'] ); ?>" style="width:90px"> <span class="description"><?php esc_html_e( '0 = disabled', 'pax-support-pro' ); ?></span></td>
                 </tr>
+            </table>
+
+            <h2 class="title"><?php esc_html_e( 'Chat Menu Items', 'pax-support-pro' ); ?></h2>
+            <p class="description"><?php esc_html_e( 'Customize the labels and visibility of menu items in the chat interface. Changes take effect immediately after saving.', 'pax-support-pro' ); ?></p>
+            <table class="form-table" role="presentation">
+                <?php
+                $menu_items = isset( $options['chat_menu_items'] ) && is_array( $options['chat_menu_items'] ) 
+                    ? $options['chat_menu_items'] 
+                    : pax_sup_default_menu_items();
+                
+                $menu_labels = array(
+                    'chat'          => __( 'Open Chat', 'pax-support-pro' ),
+                    'ticket'        => __( 'New Ticket', 'pax-support-pro' ),
+                    'help'          => __( 'Help Center', 'pax-support-pro' ),
+                    'speed'         => __( 'Super Speed', 'pax-support-pro' ),
+                    'agent'         => __( 'Live Agent', 'pax-support-pro' ),
+                    'whatsnew'      => __( 'What\'s New', 'pax-support-pro' ),
+                    'troubleshooter'=> __( 'Troubleshooter', 'pax-support-pro' ),
+                    'diag'          => __( 'Diagnostics', 'pax-support-pro' ),
+                    'callback'      => __( 'Request a Callback', 'pax-support-pro' ),
+                    'order'         => __( 'Order Lookup', 'pax-support-pro' ),
+                    'myreq'         => __( 'My Request', 'pax-support-pro' ),
+                    'feedback'      => __( 'Feedback', 'pax-support-pro' ),
+                    'donate'        => __( 'Donate', 'pax-support-pro' ),
+                );
+
+                foreach ( $menu_items as $key => $item ) :
+                    $label = isset( $item['label'] ) ? $item['label'] : ( $menu_labels[ $key ] ?? $key );
+                    $visible = isset( $item['visible'] ) ? $item['visible'] : 1;
+                    $display_name = $menu_labels[ $key ] ?? ucfirst( str_replace( '_', ' ', $key ) );
+                ?>
+                <tr>
+                    <th scope="row"><?php echo esc_html( $display_name ); ?></th>
+                    <td>
+                        <input type="text" 
+                               name="menu_items[<?php echo esc_attr( $key ); ?>][label]" 
+                               value="<?php echo esc_attr( $label ); ?>" 
+                               class="regular-text" 
+                               placeholder="<?php echo esc_attr( $display_name ); ?>">
+                        <label style="margin-left: 15px;">
+                            <input type="checkbox" 
+                                   name="menu_items[<?php echo esc_attr( $key ); ?>][visible]" 
+                                   value="1" 
+                                   <?php checked( $visible ); ?>>
+                            <?php esc_html_e( 'Visible', 'pax-support-pro' ); ?>
+                        </label>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
             </table>
 
             <?php submit_button( __( 'Save Changes', 'pax-support-pro' ) ); ?>

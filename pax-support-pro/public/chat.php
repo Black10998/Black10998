@@ -72,12 +72,17 @@ function pax_sup_enqueue_public_assets() {
 
     $scheduler_settings = pax_sup_get_scheduler_settings();
 
+    $menu_items = isset( $options['chat_menu_items'] ) && is_array( $options['chat_menu_items'] ) 
+        ? $options['chat_menu_items'] 
+        : pax_sup_default_menu_items();
+
     $localize = array(
         'options' => array(
             'enable_speed'         => ! empty( $options['enable_speed'] ),
             'toggle_on_click'      => ! empty( $options['toggle_on_click'] ),
             'enable_offline_guard' => ! empty( $options['enable_offline_guard'] ),
         ),
+        'menuItems' => $menu_items,
         'rest'    => array(
             'chat'     => esc_url_raw( rest_url( PAX_SUP_REST_NS . '/chat' ) ),
             'ai'       => esc_url_raw( rest_url( 'pax-support/v1/ai-chat' ) ),
@@ -258,19 +263,39 @@ function pax_sup_render_frontend_markup() {
             <button class="pax-iconbtn" id="pax-close" type="button" aria-label="<?php echo esc_attr__( 'Close', 'pax-support-pro' ); ?>"><svg viewBox="0 0 24 24"><path d="M6.7 5.3 5.3 6.7 10.6 12l-5.3 5.3 1.4 1.4L12 13.4l5.3 5.3 1.4-1.4L13.4 12l5.3-5.3-1.4-1.4L12 10.6z"/></svg></button>
 
             <div id="pax-head-menu" role="menu" aria-label="<?php echo esc_attr__( 'Chat menu', 'pax-support-pro' ); ?>">
-                <div class="pax-item" data-act="chat"><svg viewBox="0 0 24 24"><path d="M4 3h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-6.6l-4.2 3.5a1 1 0 0 1-1.6-.8V16H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/></svg><span><?php esc_html_e( 'Open Chat', 'pax-support-pro' ); ?></span></div>
-                <div class="pax-item" data-act="ticket"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v3a2 2 0 1 0 0 4v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-3a2 2 0 1 0 0-4V7z"/></svg><span><?php esc_html_e( 'New Ticket', 'pax-support-pro' ); ?></span><span class="pax-badge" id="pax-ticket-cd" style="display:none"></span></div>
-                <div class="pax-item" data-act="help"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2Zm1 15h-2v-2h2Zm2.07-7.75-.9.92A3.49 3.49 0 0 0 13 12h-2v-.5a4.5 4.5 0 0 1 1.33-3.17l1.24-1.26a1.5 1.5 0 1 0-2.12-2.12A4.49 4.49 0 0 0 9 7.5H7a6.5 6.5 0 1 1 11.07 4.61A6.48 6.48 0 0 1 15 14v-1a3.49 3.49 0 0 0 .93-2.33 3.47 3.47 0 0 0-.86-2.42Z"/></svg><span><?php esc_html_e( 'Help Center', 'pax-support-pro' ); ?></span></div>
-                <div class="pax-item" data-act="speed"><svg viewBox="0 0 24 24"><path d="M3 13a9 9 0 1 1 18 0 9 9 0 0 1-18 0Zm9-6a1 1 0 0 0-1 1v4.59l-2.3 2.3 1.4 1.42 2.6-2.6V8a1 1 0 0 0-1-1Z"/></svg><span id="pax-speed-label"><?php esc_html_e( 'Super Speed', 'pax-support-pro' ); ?></span></div>
-                <div class="pax-item" data-act="agent"><svg viewBox="0 0 24 24"><path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5Zm0 2c-5 0-9 2.5-9 5.5V22h18v-2.5C21 16.5 17 14 12 14Z"/></svg><span><?php esc_html_e( 'Live Agent', 'pax-support-pro' ); ?></span></div>
-                <div class="pax-item" data-act="whatsnew"><svg viewBox="0 0 24 24"><path d="M4 4h16v4H4zM4 10h10v4H4zM4 16h16v4H4z"/></svg><span><?php esc_html_e( 'What’s New', 'pax-support-pro' ); ?></span></div>
-                <div class="pax-item" data-act="troubleshooter"><svg viewBox="0 0 24 24"><path d="M4 4h16v4H4zM4 10h12v10H4zM18 10h2v10h-2z"/></svg><span><?php esc_html_e( 'Troubleshooter', 'pax-support-pro' ); ?></span></div>
-                <div class="pax-item" data-act="diag"><svg viewBox="0 0 24 24"><path d="M3 13h4l3 7 4-14 3 7h4"/></svg><span><?php esc_html_e( 'Diagnostics', 'pax-support-pro' ); ?></span></div>
-                <div class="pax-item" data-act="callback"><svg viewBox="0 0 24 24"><path d="M6 2h4l2 6-3 2a13 13 0 0 0 6 6l2-3 6 2v4a2 2 0 0 1-2 2A18 18 0 0 1 2 8a2 2 0 0 1 2-2h2z"/></svg><span><?php esc_html_e( 'Request a Callback', 'pax-support-pro' ); ?></span></div>
-                <div class="pax-item" data-act="order"><svg viewBox="0 0 24 24"><path d="M6 2h9l5 5v15H6zM8 8h8M8 12h8M8 16h8"/></svg><span><?php esc_html_e( 'Order Lookup', 'pax-support-pro' ); ?></span></div>
-                <div class="pax-item" data-act="myreq"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4zM8 8h8v8H8z"/></svg><span><?php esc_html_e( 'My Request', 'pax-support-pro' ); ?></span></div>
-                <div class="pax-item" data-act="feedback"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2Zm1 15h-2v-2h2Zm0-4h-2V7h2z"/></svg><span><?php esc_html_e( 'Feedback', 'pax-support-pro' ); ?></span></div>
-                <div class="pax-item" data-act="donate"><svg viewBox="0 0 24 24"><path d="M12 21.35 10.55 20C5.4 15.36 2 12.28 2 8.5A4.5 4.5 0 0 1 6.5 4a3.7 3.7 0 0 1 3.5 2.44A3.7 3.7 0 0 1 13.5 4 4.5 4.5 0 0 1 18 8.5c0 3.78-3.4 6.86-8.55 11.54Z"/></svg><span><?php esc_html_e( 'Donate', 'pax-support-pro' ); ?></span></div>
+                <?php
+                $menu_icons = array(
+                    'chat'          => '<path d="M4 3h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-6.6l-4.2 3.5a1 1 0 0 1-1.6-.8V16H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/>',
+                    'ticket'        => '<path d="M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v3a2 2 0 1 0 0 4v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-3a2 2 0 1 0 0-4V7z"/>',
+                    'help'          => '<path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2Zm1 15h-2v-2h2Zm2.07-7.75-.9.92A3.49 3.49 0 0 0 13 12h-2v-.5a4.5 4.5 0 0 1 1.33-3.17l1.24-1.26a1.5 1.5 0 1 0-2.12-2.12A4.49 4.49 0 0 0 9 7.5H7a6.5 6.5 0 1 1 11.07 4.61A6.48 6.48 0 0 1 15 14v-1a3.49 3.49 0 0 0 .93-2.33 3.47 3.47 0 0 0-.86-2.42Z"/>',
+                    'speed'         => '<path d="M3 13a9 9 0 1 1 18 0 9 9 0 0 1-18 0Zm9-6a1 1 0 0 0-1 1v4.59l-2.3 2.3 1.4 1.42 2.6-2.6V8a1 1 0 0 0-1-1Z"/>',
+                    'agent'         => '<path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5Zm0 2c-5 0-9 2.5-9 5.5V22h18v-2.5C21 16.5 17 14 12 14Z"/>',
+                    'whatsnew'      => '<path d="M4 4h16v4H4zM4 10h10v4H4zM4 16h16v4H4z"/>',
+                    'troubleshooter'=> '<path d="M4 4h16v4H4zM4 10h12v10H4zM18 10h2v10h-2z"/>',
+                    'diag'          => '<path d="M3 13h4l3 7 4-14 3 7h4"/>',
+                    'callback'      => '<path d="M6 2h4l2 6-3 2a13 13 0 0 0 6 6l2-3 6 2v4a2 2 0 0 1-2 2A18 18 0 0 1 2 8a2 2 0 0 1 2-2h2z"/>',
+                    'order'         => '<path d="M6 2h9l5 5v15H6zM8 8h8M8 12h8M8 16h8"/>',
+                    'myreq'         => '<path d="M4 4h16v16H4zM8 8h8v8H8z"/>',
+                    'feedback'      => '<path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2Zm1 15h-2v-2h2Zm0-4h-2V7h2z"/>',
+                    'donate'        => '<path d="M12 21.35 10.55 20C5.4 15.36 2 12.28 2 8.5A4.5 4.5 0 0 1 6.5 4a3.7 3.7 0 0 1 3.5 2.44A3.7 3.7 0 0 1 13.5 4 4.5 4.5 0 0 1 18 8.5c0 3.78-3.4 6.86-8.55 11.54Z"/>',
+                );
+
+                foreach ( $menu_items as $key => $item ) :
+                    if ( empty( $item['visible'] ) ) {
+                        continue;
+                    }
+                    $label = isset( $item['label'] ) ? $item['label'] : $key;
+                    $icon = isset( $menu_icons[ $key ] ) ? $menu_icons[ $key ] : '<path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2Z"/>';
+                    $extra_id = ( 'speed' === $key ) ? ' id="pax-speed-label"' : '';
+                    $badge = ( 'ticket' === $key ) ? '<span class="pax-badge" id="pax-ticket-cd" style="display:none"></span>' : '';
+                ?>
+                <div class="pax-item" data-act="<?php echo esc_attr( $key ); ?>">
+                    <svg viewBox="0 0 24 24"><?php echo $icon; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></svg>
+                    <span<?php echo $extra_id; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>><?php echo esc_html( $label ); ?></span>
+                    <?php echo $badge; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                </div>
+                <?php endforeach; ?>
+            </div>
             </div>
         </div>
 
