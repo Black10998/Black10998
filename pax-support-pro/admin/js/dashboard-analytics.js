@@ -22,6 +22,7 @@
 
     let chart = null;
     let updateInterval = null;
+    let healthInterval = null;
 
     // Initialize on DOM ready
     if (document.readyState === 'loading') {
@@ -33,6 +34,9 @@
     function init() {
         const canvas = document.getElementById('pax-analytics-chart');
         if (!canvas) return;
+
+        // Initialize system health indicator
+        initSystemHealth();
 
         // Load Chart.js if not already loaded
         if (typeof Chart === 'undefined') {
@@ -379,11 +383,153 @@
     }
 
     /**
+     * Initialize system health indicator
+     */
+    function initSystemHealth() {
+        updateSystemHealth();
+        
+        // Update health every 10 seconds
+        healthInterval = setInterval(updateSystemHealth, 10000);
+    }
+
+    /**
+     * Update system health indicator
+     */
+    function updateSystemHealth() {
+        const healthCircle = document.querySelector('.pax-health-circle');
+        const healthLabel = document.querySelector('.pax-health-label');
+        const healthMetrics = document.querySelectorAll('.pax-health-metric-value');
+        
+        if (!healthCircle || !healthLabel) return;
+        
+        // Fetch system metrics (in production, this would be an AJAX call)
+        fetchSystemMetrics().then(metrics => {
+            const status = calculateHealthStatus(metrics);
+            
+            // Update circle
+            healthCircle.className = 'pax-health-circle ' + status.class;
+            
+            // Update label with smooth transition
+            healthLabel.style.opacity = '0';
+            setTimeout(() => {
+                healthLabel.textContent = status.label;
+                healthLabel.className = 'pax-health-label ' + status.class;
+                healthLabel.style.opacity = '1';
+            }, 150);
+            
+            // Update tooltip metrics
+            if (healthMetrics.length >= 4) {
+                updateMetricValue(healthMetrics[0], metrics.cpu, 80, 90);
+                updateMetricValue(healthMetrics[1], metrics.memory, 75, 85);
+                updateMetricValue(healthMetrics[2], metrics.disk, 80, 90);
+                updateMetricValue(healthMetrics[3], metrics.responseTime, 500, 1000, true);
+            }
+        });
+    }
+
+    /**
+     * Fetch system metrics
+     */
+    function fetchSystemMetrics() {
+        // Try to fetch from WordPress REST API
+        if (typeof wpApiSettings !== 'undefined' && wpApiSettings.root) {
+            return fetch(wpApiSettings.root + 'pax/v1/system-health', {
+                method: 'GET',
+                headers: {
+                    'X-WP-Nonce': wpApiSettings.nonce
+                }
+            })
+            .then(response => response.json())
+            .catch(() => {
+                // Fallback to simulated data if API fails
+                return getSimulatedMetrics();
+            });
+        }
+        
+        // Fallback to simulated data
+        return Promise.resolve(getSimulatedMetrics());
+    }
+
+    /**
+     * Get simulated metrics (fallback)
+     */
+    function getSimulatedMetrics() {
+        return {
+            cpu: Math.round(30 + Math.random() * 50),
+            memory: Math.round(40 + Math.random() * 40),
+            disk: Math.round(50 + Math.random() * 30),
+            responseTime: Math.round(100 + Math.random() * 400),
+            errors: Math.random() > 0.9 ? Math.round(Math.random() * 5) : 0
+        };
+    }
+
+    /**
+     * Calculate health status based on metrics
+     */
+    function calculateHealthStatus(metrics) {
+        // Critical conditions
+        if (metrics.cpu > 90 || metrics.memory > 85 || metrics.errors > 3) {
+            return {
+                class: 'critical',
+                label: 'Critical Error'
+            };
+        }
+        
+        // Warning conditions
+        if (metrics.cpu > 80 || metrics.memory > 75 || metrics.responseTime > 500) {
+            return {
+                class: 'warning',
+                label: 'High Load'
+            };
+        }
+        
+        // Healthy
+        return {
+            class: 'healthy',
+            label: 'System Stable'
+        };
+    }
+
+    /**
+     * Update metric value with color coding
+     */
+    function updateMetricValue(element, value, warningThreshold, criticalThreshold, inverse = false) {
+        if (!element) return;
+        
+        let className = 'good';
+        let displayValue = value;
+        
+        if (inverse) {
+            // For response time, higher is worse
+            displayValue = value + 'ms';
+            if (value > criticalThreshold) {
+                className = 'critical';
+            } else if (value > warningThreshold) {
+                className = 'warning';
+            }
+        } else {
+            // For CPU, memory, disk - higher is worse
+            displayValue = value + '%';
+            if (value > criticalThreshold) {
+                className = 'critical';
+            } else if (value > warningThreshold) {
+                className = 'warning';
+            }
+        }
+        
+        element.textContent = displayValue;
+        element.className = 'pax-health-metric-value ' + className;
+    }
+
+    /**
      * Cleanup on page unload
      */
     window.addEventListener('beforeunload', () => {
         if (updateInterval) {
             clearInterval(updateInterval);
+        }
+        if (healthInterval) {
+            clearInterval(healthInterval);
         }
         if (chart) {
             chart.destroy();

@@ -57,3 +57,4 @@ require_once PAX_SUP_DIR . 'rest/callback.php';
 require_once PAX_SUP_DIR . 'rest/support.php';
 require_once PAX_SUP_DIR . 'rest/scheduler.php';
 require_once PAX_SUP_DIR . 'rest/attachment.php';
+require_once PAX_SUP_DIR . 'rest/system-health.php';

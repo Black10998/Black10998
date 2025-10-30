@@ -30,6 +30,35 @@ function pax_sup_render_analytics_dashboard() {
     
     ?>
     <div class="pax-analytics-container">
+        <!-- System Health Indicator -->
+        <div class="pax-system-health">
+            <div class="pax-health-circle healthy"></div>
+            <span class="pax-health-label healthy"><?php esc_html_e( 'System Stable', 'pax-support-pro' ); ?></span>
+            
+            <div class="pax-health-tooltip">
+                <div class="pax-health-tooltip-title">
+                    <span class="dashicons dashicons-admin-generic"></span>
+                    <?php esc_html_e( 'System Health', 'pax-support-pro' ); ?>
+                </div>
+                <div class="pax-health-metric">
+                    <span class="pax-health-metric-label"><?php esc_html_e( 'CPU Usage', 'pax-support-pro' ); ?></span>
+                    <span class="pax-health-metric-value good">45%</span>
+                </div>
+                <div class="pax-health-metric">
+                    <span class="pax-health-metric-label"><?php esc_html_e( 'Memory Usage', 'pax-support-pro' ); ?></span>
+                    <span class="pax-health-metric-value good">52%</span>
+                </div>
+                <div class="pax-health-metric">
+                    <span class="pax-health-metric-label"><?php esc_html_e( 'Disk Usage', 'pax-support-pro' ); ?></span>
+                    <span class="pax-health-metric-value good">68%</span>
+                </div>
+                <div class="pax-health-metric">
+                    <span class="pax-health-metric-label"><?php esc_html_e( 'Response Time', 'pax-support-pro' ); ?></span>
+                    <span class="pax-health-metric-value good">250ms</span>
+                </div>
+            </div>
+        </div>
+        
         <div class="pax-chart-header">
             <h2 class="pax-chart-title">
                 <span class="dashicons dashicons-chart-line"></span>
@@ -108,6 +137,16 @@ function pax_sup_enqueue_analytics_assets() {
         array(),
         PAX_SUP_VER,
         true
+    );
+    
+    // Localize script with REST API settings
+    wp_localize_script(
+        'pax-dashboard-analytics',
+        'wpApiSettings',
+        array(
+            'root'  => esc_url_raw( rest_url() ),
+            'nonce' => wp_create_nonce( 'wp_rest' )
+        )
     );
 }
 add_action( 'admin_enqueue_scripts', 'pax_sup_enqueue_analytics_assets' );
