@@ -131,7 +131,7 @@ function pax_sup_rest_schedule_create( WP_REST_Request $request ) {
             'created_at'    => current_time( 'mysql' ),
             'updated_at'    => current_time( 'mysql' ),
         ),
-        array( '%d', '%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s' )
+        array( '%d', '%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s' )
     );
 
     if ( false === $inserted ) {
