@@ -20,6 +20,7 @@
         initResetButton();
         initToggles();
         initFormValidation();
+        initMenuItemsSync();
     }
 
     /**
@@ -393,10 +394,82 @@
         initIconSelection();
     }
 
+    /**
+     * Initialize menu items real-time sync
+     */
+    function initMenuItemsSync() {
+        const menuItems = document.querySelectorAll('.pax-menu-item');
+        
+        menuItems.forEach(item => {
+            const labelInput = item.querySelector('.pax-menu-item-label');
+            const visibleToggle = item.querySelector('.pax-menu-item-toggle input');
+            const key = item.dataset.key;
+            
+            // Real-time label sync
+            if (labelInput) {
+                labelInput.addEventListener('input', debounce(function() {
+                    syncMenuItemToFrontend(key, this.value, visibleToggle?.checked);
+                    
+                    // Visual feedback
+                    labelInput.style.borderColor = 'var(--pax-success)';
+                    setTimeout(() => {
+                        labelInput.style.borderColor = '';
+                    }, 500);
+                }, 300));
+                
+                // Restore original on ESC
+                labelInput.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape') {
+                        this.value = this.dataset.original;
+                        this.blur();
+                    }
+                });
+            }
+            
+            // Real-time visibility sync
+            if (visibleToggle) {
+                visibleToggle.addEventListener('change', function() {
+                    syncMenuItemToFrontend(key, labelInput?.value, this.checked);
+                    
+                    // Visual feedback
+                    item.style.opacity = this.checked ? '1' : '0.5';
+                });
+                
+                // Set initial opacity
+                item.style.opacity = visibleToggle.checked ? '1' : '0.5';
+            }
+        });
+    }
+    
+    /**
+     * Sync menu item changes to frontend (if chat widget is open)
+     */
+    function syncMenuItemToFrontend(key, label, visible) {
+        // Store in localStorage for frontend to pick up
+        try {
+            const storedMenu = JSON.parse(localStorage.getItem('pax_menu_sync') || '{}');
+            storedMenu[key] = {
+                key: key,
+                label: label,
+                visible: visible,
+                timestamp: Date.now()
+            };
+            localStorage.setItem('pax_menu_sync', JSON.stringify(storedMenu));
+            
+            // Dispatch custom event for real-time sync
+            window.dispatchEvent(new CustomEvent('pax-menu-updated', {
+                detail: { key, label, visible }
+            }));
+        } catch (e) {
+            console.warn('Could not sync menu item:', e);
+        }
+    }
+
     // Export for external use
     window.paxSettings = {
         updatePreview: updateLivePreview,
         showSuccess: showSuccessMessage,
-        showError: showErrorMessage
+        showError: showErrorMessage,
+        syncMenuItem: syncMenuItemToFrontend
     };
 })();

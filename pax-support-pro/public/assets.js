@@ -20,6 +20,7 @@
 
   const launcher = document.getElementById('pax-launcher');
   const chat = document.getElementById('pax-chat');
+  const chatOverlay = document.getElementById('pax-chat-overlay');
   const log = document.getElementById('pax-log');
   const input = document.getElementById('pax-in');
   const sendBtn = document.getElementById('pax-send');
@@ -403,11 +404,17 @@
     const open = chat.classList.contains('open');
     if (opts.toggle_on_click) {
       chat.classList.toggle('open');
+      if (chatOverlay) {
+        chatOverlay.classList.toggle('open');
+      }
       if (!open) {
         focusInput();
       }
     } else if (!open) {
       chat.classList.add('open');
+      if (chatOverlay) {
+        chatOverlay.classList.add('open');
+      }
       focusInput();
     }
   });
@@ -415,8 +422,29 @@
   if (closeBtn) {
     closeBtn.addEventListener('click', function () {
       chat.classList.remove('open');
+      if (chatOverlay) {
+        chatOverlay.classList.remove('open');
+      }
     });
   }
+
+  // Close on overlay click
+  if (chatOverlay) {
+    chatOverlay.addEventListener('click', function () {
+      chat.classList.remove('open');
+      chatOverlay.classList.remove('open');
+    });
+  }
+
+  // Close on ESC key
+  document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape' && chat.classList.contains('open')) {
+      chat.classList.remove('open');
+      if (chatOverlay) {
+        chatOverlay.classList.remove('open');
+      }
+    }
+  });
 
   if (menuBtn && menu) {
     menuBtn.addEventListener('click', function (event) {
@@ -1901,4 +1929,44 @@
   }
 
   window.submitTicketWithAttachments = submitTicketWithAttachments;
+
+  // Real-time menu sync listener
+  window.addEventListener('pax-menu-updated', function(event) {
+    const { key, label, visible } = event.detail;
+    const menuItem = menu ? menu.querySelector(`[data-act="${key}"]`) : null;
+    
+    if (menuItem) {
+      // Update label
+      const labelSpan = menuItem.querySelector('span:not(.pax-badge)');
+      if (labelSpan && label) {
+        labelSpan.textContent = label;
+      }
+      
+      // Update visibility
+      if (typeof visible !== 'undefined') {
+        menuItem.style.display = visible ? 'flex' : 'none';
+      }
+    }
+  });
+
+  // Check localStorage for menu sync on load
+  try {
+    const storedMenu = JSON.parse(localStorage.getItem('pax_menu_sync') || '{}');
+    Object.keys(storedMenu).forEach(function(key) {
+      const data = storedMenu[key];
+      const menuItem = menu ? menu.querySelector(`[data-act="${key}"]`) : null;
+      
+      if (menuItem && data) {
+        const labelSpan = menuItem.querySelector('span:not(.pax-badge)');
+        if (labelSpan && data.label) {
+          labelSpan.textContent = data.label;
+        }
+        if (typeof data.visible !== 'undefined') {
+          menuItem.style.display = data.visible ? 'flex' : 'none';
+        }
+      }
+    });
+  } catch (e) {
+    // Ignore localStorage errors
+  }
 })();

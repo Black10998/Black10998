@@ -299,6 +299,70 @@ function pax_sup_render_modern_settings() {
                         </div>
                     </div>
 
+                    <!-- Chat Menu Items -->
+                    <div class="pax-card">
+                        <div class="pax-card-header">
+                            <span class="dashicons dashicons-menu-alt"></span>
+                            <h2><?php esc_html_e( 'Chat Menu Items', 'pax-support-pro' ); ?></h2>
+                        </div>
+                        <div class="pax-card-body">
+                            <p class="pax-form-description" style="margin-bottom: 20px;">
+                                <?php esc_html_e( 'Customize the menu items shown in the chat widget. Click on a label to edit it inline. Changes sync in real-time.', 'pax-support-pro' ); ?>
+                            </p>
+                            
+                            <div id="pax-menu-items-list">
+                                <?php
+                                $menu_items = isset( $options['chat_menu_items'] ) && is_array( $options['chat_menu_items'] )
+                                    ? $options['chat_menu_items']
+                                    : pax_sup_default_menu_items();
+                                
+                                $menu_icons_map = array(
+                                    'chat'          => 'dashicons-format-chat',
+                                    'ticket'        => 'dashicons-tickets-alt',
+                                    'help'          => 'dashicons-editor-help',
+                                    'speed'         => 'dashicons-performance',
+                                    'agent'         => 'dashicons-admin-users',
+                                    'whatsnew'      => 'dashicons-megaphone',
+                                    'troubleshooter'=> 'dashicons-admin-tools',
+                                    'diag'          => 'dashicons-chart-line',
+                                    'callback'      => 'dashicons-phone',
+                                    'order'         => 'dashicons-cart',
+                                    'myreq'         => 'dashicons-list-view',
+                                    'feedback'      => 'dashicons-star-filled',
+                                    'donate'        => 'dashicons-heart',
+                                );
+                                
+                                foreach ( $menu_items as $key => $item ) :
+                                    $label = isset( $item['label'] ) ? $item['label'] : ucfirst( $key );
+                                    $visible = isset( $item['visible'] ) ? $item['visible'] : 1;
+                                    $icon_class = isset( $menu_icons_map[ $key ] ) ? $menu_icons_map[ $key ] : 'dashicons-admin-generic';
+                                ?>
+                                <div class="pax-menu-item" data-key="<?php echo esc_attr( $key ); ?>">
+                                    <div class="pax-menu-item-icon">
+                                        <span class="dashicons <?php echo esc_attr( $icon_class ); ?>"></span>
+                                    </div>
+                                    <div class="pax-menu-item-content">
+                                        <input type="text" 
+                                               name="menu_items[<?php echo esc_attr( $key ); ?>][label]" 
+                                               value="<?php echo esc_attr( $label ); ?>" 
+                                               class="pax-menu-item-label"
+                                               data-original="<?php echo esc_attr( $label ); ?>"
+                                               placeholder="<?php echo esc_attr( ucfirst( $key ) ); ?>">
+                                        <span class="pax-menu-item-key"><?php echo esc_html( $key ); ?></span>
+                                    </div>
+                                    <label class="pax-toggle pax-menu-item-toggle">
+                                        <input type="checkbox" 
+                                               name="menu_items[<?php echo esc_attr( $key ); ?>][visible]" 
+                                               value="1"
+                                               <?php checked( $visible ); ?>>
+                                        <span class="pax-toggle-slider"></span>
+                                    </label>
+                                </div>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
 
                 <!-- Live Preview Panel -->

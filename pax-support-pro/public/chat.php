@@ -246,11 +246,13 @@ function pax_sup_render_frontend_markup() {
         return;
     }
     ?>
+    <div id="pax-chat-overlay"></div>
+    
     <div id="pax-launcher" title="<?php echo esc_attr__( 'Support', 'pax-support-pro' ); ?>" aria-label="<?php echo esc_attr__( 'Open support', 'pax-support-pro' ); ?>">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-6.6l-4.2 3.5a1 1 0 0 1-1.6-.8V16H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/></svg>
     </div>
 
-    <div id="pax-chat" role="dialog" aria-modal="false" aria-label="<?php echo esc_attr__( 'PAX Support Chat', 'pax-support-pro' ); ?>">
+    <div id="pax-chat" role="dialog" aria-modal="true" aria-label="<?php echo esc_attr__( 'PAX Support Chat', 'pax-support-pro' ); ?>" class="modal-mode">
         <div class="pax-header" id="pax-head">
             <span class="pax-led"></span>
             <div>
