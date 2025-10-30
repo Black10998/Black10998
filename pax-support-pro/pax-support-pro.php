@@ -2,7 +2,7 @@
 /**
  * Plugin Name: PAX Support Pro
  * Description: Unified chat/tickets UI + console + settings. Clean, secure UX.
- * Version: 1.1.0
+ * Version: 1.1.2
  * Author: Ahmad AlKhalaf
  * Text Domain: pax-support-pro
  */
@@ -28,7 +28,7 @@ if ( ! defined( 'PAX_SUP_NS' ) ) {
 }
 
 if ( ! defined( 'PAX_SUP_VER' ) ) {
-    define( 'PAX_SUP_VER', '1.1.0' );
+    define( 'PAX_SUP_VER', '1.1.2' );
 }
 
 if ( ! defined( 'PAX_SUP_OPT_KEY' ) ) {

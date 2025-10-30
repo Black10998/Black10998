@@ -221,3 +221,27 @@ For direct support or contributions:
 
 ## 🧾 Changelog
 
+### Version 1.1.2 (2025-10-30)
+**Stable Release - Chat Modal & Dropdown Fixes**
+
+#### Fixed
+- ✅ Chat widget now opens exclusively inside modal window (not page-embedded)
+- ✅ Three-dot dropdown menu displays all items correctly for logged-in users
+- ✅ Dropdown menu z-index increased for better visibility above all elements
+- ✅ Guest users now receive login-required alert when clicking menu button
+- ✅ Guest users see disabled input with login message instead of removed chat
+- ✅ WordPress 'Update Now' button appears correctly when new release is published
+- ✅ Enhanced modal isolation with ESC key support for all modals
+- ✅ Improved click-outside detection for dropdown menu
+- ✅ Added ESC key handler to close dropdown menu
+- ✅ Fixed GitHub updater metadata to ensure proper update detection
+
+#### Enhanced
+- ✅ Mobile responsive styles for dropdown menu
+- ✅ All menu content loads inside modals (not main page DOM)
+- ✅ Modal backdrop, animations, and click-outside functionality verified
+- ✅ Added required plugin metadata fields for WordPress compatibility
+
+### Version 1.1.1 (Previous)
+- Initial release with core features
+
