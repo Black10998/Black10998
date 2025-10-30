@@ -184,7 +184,30 @@ function pax_sup_rest_ticket_create( WP_REST_Request $request ) {
 
     $ticket_id = (int) $wpdb->insert_id;
 
-    pax_sup_ticket_add_message( $ticket_id, 'user', $message );
+    $message_id = pax_sup_ticket_add_message( $ticket_id, 'user', $message );
+
+    // Handle file attachments
+    $attachments = array();
+    if ( ! empty( $_FILES ) ) {
+        foreach ( $_FILES as $file_key => $file ) {
+            if ( strpos( $file_key, 'attachment' ) === 0 && ! empty( $file['name'] ) ) {
+                $upload_result = pax_sup_handle_file_upload( $file, $ticket_id, $user_id );
+                
+                if ( ! is_wp_error( $upload_result ) ) {
+                    $attachment_id = pax_sup_save_attachment( $ticket_id, $message_id, $user_id, $upload_result );
+                    if ( $attachment_id ) {
+                        $attachments[] = array(
+                            'id'        => $attachment_id,
+                            'file_name' => $upload_result['file_name'],
+                            'file_size' => $upload_result['file_size'],
+                            'file_type' => $upload_result['file_type'],
+                            'url'       => $upload_result['url'],
+                        );
+                    }
+                }
+            }
+        }
+    }
 
     $until = $cool_days > 0 ? $now + ( $cool_days * DAY_IN_SECONDS ) : 0;
     if ( $until > 0 ) {
@@ -206,6 +229,7 @@ function pax_sup_rest_ticket_create( WP_REST_Request $request ) {
         'id'             => $ticket_id,
         'status'         => 'open',
         'cooldown_until' => $until,
+        'attachments'    => $attachments,
     );
 
     return new WP_REST_Response( $response, 200 );
@@ -395,7 +419,7 @@ function pax_sup_ticket_add_message( $ticket_id, $sender, $note ) {
 
     $ticket_id = (int) $ticket_id;
     if ( $ticket_id <= 0 || empty( $note ) ) {
-        return;
+        return 0;
     }
 
     $sender = in_array( $sender, array( 'agent', 'user' ), true ) ? $sender : 'user';
@@ -415,6 +439,8 @@ function pax_sup_ticket_add_message( $ticket_id, $sender, $note ) {
     );
 
     pax_sup_ticket_touch( $ticket_id, $created );
+    
+    return (int) $wpdb->insert_id;
 }
 
 function pax_sup_ticket_touch( $ticket_id, $time = '' ) {
@@ -484,15 +510,19 @@ function pax_sup_ticket_to_array( $ticket, $with_messages = false ) {
         $messages = pax_sup_ticket_get_messages( (int) $ticket->id );
         $thread   = array();
         foreach ( (array) $messages as $msg ) {
+            $message_attachments = pax_sup_get_message_attachments( (int) $msg->id );
             $thread[] = array(
-                'id'      => (int) $msg->id,
-                'sender'  => $msg->sender,
-                'note'    => wp_kses_post( $msg->note ),
-                'created' => mysql2date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $msg->created_at, false ),
+                'id'          => (int) $msg->id,
+                'sender'      => $msg->sender,
+                'note'        => wp_kses_post( $msg->note ),
+                'created'     => mysql2date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $msg->created_at, false ),
+                'attachments' => $message_attachments,
             );
         }
         $data['messages'] = $thread;
     }
+
+    $data['attachments'] = pax_sup_get_ticket_attachments( (int) $ticket->id );
 
     return $data;
 }

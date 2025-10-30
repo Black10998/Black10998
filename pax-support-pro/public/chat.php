@@ -277,9 +277,22 @@ function pax_sup_render_frontend_markup() {
         <div id="pax-log" class="pax-log" aria-live="polite"></div>
         <div id="pax-suggestions" class="pax-suggestions" aria-live="polite"></div>
 
+        <div id="pax-attachment-preview" class="pax-attachment-preview" style="display:none;"></div>
+        
         <div class="pax-input">
+            <button id="pax-attach" class="pax-attach" type="button" aria-label="<?php echo esc_attr__( 'Attach file', 'pax-support-pro' ); ?>" title="<?php echo esc_attr__( 'Attach file', 'pax-support-pro' ); ?>">
+                <svg viewBox="0 0 24 24"><path d="M16.5 6v11.5c0 2.21-1.79 4-4 4s-4-1.79-4-4V5a2.5 2.5 0 0 1 5 0v10.5c0 .55-.45 1-1 1s-1-.45-1-1V6H10v9.5a2.5 2.5 0 0 0 5 0V5c0-2.21-1.79-4-4-4S7 2.79 7 5v12.5c0 3.04 2.46 5.5 5.5 5.5s5.5-2.46 5.5-5.5V6h-1.5z"/></svg>
+            </button>
+            <input id="pax-file-input" type="file" accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.xls,.xlsx,.txt,.zip" style="display:none;" aria-label="<?php echo esc_attr__( 'Select file', 'pax-support-pro' ); ?>">
             <input id="pax-in" type="text" placeholder="<?php echo esc_attr__( 'Type your message...', 'pax-support-pro' ); ?>" maxlength="1200" aria-label="<?php echo esc_attr__( 'Message', 'pax-support-pro' ); ?>">
             <button id="pax-send" class="pax-send" type="button" aria-label="<?php echo esc_attr__( 'Send', 'pax-support-pro' ); ?>"><svg viewBox="0 0 24 24"><path d="M2.01 21 23 12 2.01 3 2 10l15 2-15 2z"/></svg></button>
+        </div>
+        
+        <div id="pax-drop-zone" class="pax-drop-zone" style="display:none;">
+            <div class="pax-drop-zone-content">
+                <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+                <p><?php esc_html_e( 'Drop file here to attach', 'pax-support-pro' ); ?></p>
+            </div>
         </div>
     </div>
     <?php

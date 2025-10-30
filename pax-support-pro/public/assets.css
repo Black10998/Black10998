@@ -755,3 +755,213 @@ html.pax-speed #pax-launcher {
   font-size: 14px;
   line-height: 1.5;
 }
+
+/* File Attachment Styles */
+.pax-attach {
+  background: transparent;
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background .2s ease;
+  flex-shrink: 0;
+  margin-right: 4px;
+}
+
+.pax-attach:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.pax-attach svg {
+  width: 20px;
+  height: 20px;
+  fill: var(--pax-sub, #9aa0a8);
+  transition: fill .2s ease;
+}
+
+.pax-attach:hover svg {
+  fill: var(--pax-accent, #e53935);
+}
+
+.pax-attachment-preview {
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.04);
+  border-top: 1px solid var(--pax-border, #2a2d33);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.pax-attachment-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--pax-border, #2a2d33);
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--pax-text, #e8eaf0);
+  max-width: 200px;
+}
+
+.pax-attachment-item svg {
+  width: 16px;
+  height: 16px;
+  fill: var(--pax-sub, #9aa0a8);
+  flex-shrink: 0;
+}
+
+.pax-attachment-item .name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pax-attachment-item .size {
+  font-size: 11px;
+  color: var(--pax-sub, #9aa0a8);
+  flex-shrink: 0;
+}
+
+.pax-attachment-item .remove {
+  background: transparent;
+  border: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background .2s ease;
+  flex-shrink: 0;
+  padding: 0;
+}
+
+.pax-attachment-item .remove:hover {
+  background: rgba(229, 57, 53, 0.2);
+}
+
+.pax-attachment-item .remove svg {
+  width: 14px;
+  height: 14px;
+  fill: var(--pax-sub, #9aa0a8);
+}
+
+.pax-attachment-item .remove:hover svg {
+  fill: var(--pax-accent, #e53935);
+}
+
+.pax-drop-zone {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(13, 15, 18, 0.95);
+  backdrop-filter: blur(8px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .2s ease;
+}
+
+.pax-drop-zone.active {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.pax-drop-zone-content {
+  text-align: center;
+  padding: 40px;
+  border: 2px dashed var(--pax-accent, #e53935);
+  border-radius: 16px;
+  background: rgba(229, 57, 53, 0.08);
+}
+
+.pax-drop-zone-content svg {
+  width: 48px;
+  height: 48px;
+  fill: var(--pax-accent, #e53935);
+  margin-bottom: 12px;
+}
+
+.pax-drop-zone-content p {
+  color: var(--pax-text, #e8eaf0);
+  font-size: 16px;
+  font-weight: 500;
+  margin: 0;
+}
+
+.pax-message-attachments {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pax-attachment-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--pax-border, #2a2d33);
+  border-radius: 6px;
+  color: var(--pax-accent, #e53935);
+  text-decoration: none;
+  font-size: 13px;
+  transition: all .2s ease;
+  max-width: fit-content;
+}
+
+.pax-attachment-link:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--pax-accent, #e53935);
+}
+
+.pax-attachment-link svg {
+  width: 14px;
+  height: 14px;
+  fill: currentColor;
+  flex-shrink: 0;
+}
+
+.pax-attachment-link .file-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pax-attachment-link .file-name {
+  font-weight: 500;
+}
+
+.pax-attachment-link .file-size {
+  font-size: 11px;
+  color: var(--pax-sub, #9aa0a8);
+}
+
+.pax-attachment-image {
+  max-width: 200px;
+  max-height: 200px;
+  border-radius: 8px;
+  margin-top: 8px;
+  cursor: pointer;
+  transition: transform .2s ease;
+}
+
+.pax-attachment-image:hover {
+  transform: scale(1.02);
+}
+}

@@ -128,6 +128,12 @@ function pax_sup_get_schedules_table() {
     return $wpdb->prefix . 'pax_schedules';
 }
 
+function pax_sup_get_attachments_table() {
+    global $wpdb;
+
+    return $wpdb->prefix . 'pax_attachments';
+}
+
 function pax_sup_ensure_ticket_tables() {
     static $done = false;
 
@@ -202,10 +208,28 @@ function pax_sup_ensure_ticket_tables() {
         KEY schedule_lookup (schedule_date, schedule_time, status)
     ) {$charset};";
 
+    $attachments = pax_sup_get_attachments_table();
+    $attachments_sql = "CREATE TABLE {$attachments} (
+        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        ticket_id BIGINT UNSIGNED NOT NULL,
+        message_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
+        user_id BIGINT UNSIGNED NOT NULL,
+        file_name VARCHAR(255) NOT NULL,
+        file_path VARCHAR(500) NOT NULL,
+        file_type VARCHAR(100) NOT NULL,
+        file_size BIGINT UNSIGNED NOT NULL,
+        created_at DATETIME NOT NULL,
+        PRIMARY KEY  (id),
+        KEY ticket_id (ticket_id),
+        KEY message_id (message_id),
+        KEY user_id (user_id)
+    ) {$charset};";
+
     dbDelta( $ticket_sql );
     dbDelta( $message_sql );
     dbDelta( $logs_sql );
     dbDelta( $schedule_sql );
+    dbDelta( $attachments_sql );
 }
 
 function pax_sup_scheduler_default_settings() {

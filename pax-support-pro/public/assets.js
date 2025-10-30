@@ -1471,6 +1471,39 @@
             body.className = 'body';
             body.innerHTML = msg.note || '';
             row.appendChild(body);
+            
+            // Add attachments if present
+            if (Array.isArray(msg.attachments) && msg.attachments.length) {
+              const attachmentsWrap = document.createElement('div');
+              attachmentsWrap.className = 'pax-message-attachments';
+              msg.attachments.forEach(function (att) {
+                if (att.is_image) {
+                  const img = document.createElement('img');
+                  img.src = att.url;
+                  img.alt = att.file_name;
+                  img.className = 'pax-attachment-image';
+                  img.title = att.file_name;
+                  img.addEventListener('click', function () {
+                    window.open(att.url, '_blank');
+                  });
+                  attachmentsWrap.appendChild(img);
+                } else {
+                  const link = document.createElement('a');
+                  link.href = att.url;
+                  link.className = 'pax-attachment-link';
+                  link.target = '_blank';
+                  link.rel = 'noopener noreferrer';
+                  link.innerHTML = '<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/></svg>' +
+                    '<div class="file-info">' +
+                    '<span class="file-name">' + (att.file_name || 'Download') + '</span>' +
+                    '<span class="file-size">' + formatFileSize(parseInt(att.file_size || 0)) + '</span>' +
+                    '</div>';
+                  attachmentsWrap.appendChild(link);
+                }
+              });
+              row.appendChild(attachmentsWrap);
+            }
+            
             messagesWrap.appendChild(row);
           });
         } else {
@@ -1656,4 +1689,216 @@
   }
 
   window.openTicket = openTicketModal;
+
+  // File attachment handling
+  const attachBtn = document.getElementById('pax-attach');
+  const fileInput = document.getElementById('pax-file-input');
+  const attachmentPreview = document.getElementById('pax-attachment-preview');
+  const dropZone = document.getElementById('pax-drop-zone');
+  let selectedFiles = [];
+
+  if (attachBtn && fileInput) {
+    attachBtn.addEventListener('click', function () {
+      fileInput.click();
+    });
+
+    fileInput.addEventListener('change', function (e) {
+      handleFileSelect(e.target.files);
+    });
+  }
+
+  // Drag and drop functionality
+  if (chat && dropZone) {
+    let dragCounter = 0;
+
+    chat.addEventListener('dragenter', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      dragCounter++;
+      if (dragCounter === 1) {
+        dropZone.style.display = 'flex';
+        requestAnimationFrame(function () {
+          dropZone.classList.add('active');
+        });
+      }
+    });
+
+    chat.addEventListener('dragleave', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      dragCounter--;
+      if (dragCounter === 0) {
+        dropZone.classList.remove('active');
+        setTimeout(function () {
+          if (!dropZone.classList.contains('active')) {
+            dropZone.style.display = 'none';
+          }
+        }, 200);
+      }
+    });
+
+    chat.addEventListener('dragover', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    });
+
+    chat.addEventListener('drop', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      dragCounter = 0;
+      dropZone.classList.remove('active');
+      setTimeout(function () {
+        dropZone.style.display = 'none';
+      }, 200);
+
+      if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        handleFileSelect(e.dataTransfer.files);
+      }
+    });
+  }
+
+  function handleFileSelect(files) {
+    if (!files || files.length === 0) {
+      return;
+    }
+
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf', 
+                          'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                          'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                          'text/plain', 'application/zip'];
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+
+      if (file.size > maxSize) {
+        showToast('File "' + file.name + '" is too large. Maximum size is 5MB.');
+        continue;
+      }
+
+      if (!allowedTypes.includes(file.type)) {
+        showToast('File type not allowed for "' + file.name + '".');
+        continue;
+      }
+
+      // Check if file already selected
+      const exists = selectedFiles.some(function (f) {
+        return f.name === file.name && f.size === file.size;
+      });
+
+      if (!exists) {
+        selectedFiles.push(file);
+      }
+    }
+
+    updateAttachmentPreview();
+    if (fileInput) {
+      fileInput.value = '';
+    }
+  }
+
+  function updateAttachmentPreview() {
+    if (!attachmentPreview) {
+      return;
+    }
+
+    if (selectedFiles.length === 0) {
+      attachmentPreview.style.display = 'none';
+      attachmentPreview.innerHTML = '';
+      return;
+    }
+
+    attachmentPreview.style.display = 'flex';
+    attachmentPreview.innerHTML = '';
+
+    selectedFiles.forEach(function (file, index) {
+      const item = document.createElement('div');
+      item.className = 'pax-attachment-item';
+
+      const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      icon.setAttribute('viewBox', '0 0 24 24');
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('d', 'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm4 18H6V4h7v5h5v11z');
+      icon.appendChild(path);
+
+      const nameSpan = document.createElement('span');
+      nameSpan.className = 'name';
+      nameSpan.textContent = file.name;
+      nameSpan.title = file.name;
+
+      const sizeSpan = document.createElement('span');
+      sizeSpan.className = 'size';
+      sizeSpan.textContent = formatFileSize(file.size);
+
+      const removeBtn = document.createElement('button');
+      removeBtn.className = 'remove';
+      removeBtn.type = 'button';
+      removeBtn.setAttribute('aria-label', 'Remove');
+      removeBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>';
+      removeBtn.addEventListener('click', function () {
+        removeFile(index);
+      });
+
+      item.appendChild(icon);
+      item.appendChild(nameSpan);
+      item.appendChild(sizeSpan);
+      item.appendChild(removeBtn);
+      attachmentPreview.appendChild(item);
+    });
+  }
+
+  function removeFile(index) {
+    selectedFiles.splice(index, 1);
+    updateAttachmentPreview();
+  }
+
+  function formatFileSize(bytes) {
+    if (bytes >= 1048576) {
+      return (bytes / 1048576).toFixed(2) + ' MB';
+    } else if (bytes >= 1024) {
+      return (bytes / 1024).toFixed(2) + ' KB';
+    }
+    return bytes + ' bytes';
+  }
+
+  // Override ticket submission to include files
+  const originalOpenTicketModal = openTicketModal;
+  openTicketModal = function () {
+    originalOpenTicketModal();
+    
+    // Clear selected files when opening ticket modal
+    selectedFiles = [];
+    updateAttachmentPreview();
+  };
+
+  // Modify ticket form submission
+  function submitTicketWithAttachments(formData) {
+    const form = new FormData();
+    
+    // Add form fields
+    for (const key in formData) {
+      if (formData.hasOwnProperty(key)) {
+        form.append(key, formData[key]);
+      }
+    }
+
+    // Add files
+    selectedFiles.forEach(function (file, index) {
+      form.append('attachment' + index, file);
+    });
+
+    return restFetch(rest.ticket, {
+      method: 'POST',
+      body: form,
+      headers: {
+        'X-WP-Nonce': nonce
+      }
+    }).then(function (response) {
+      selectedFiles = [];
+      updateAttachmentPreview();
+      return response;
+    });
+  }
+
+  window.submitTicketWithAttachments = submitTicketWithAttachments;
 })();

@@ -40,6 +40,7 @@ if ( ! defined( 'PAX_SUP_REST_NS' ) ) {
 }
 
 require_once PAX_SUP_DIR . 'includes/helpers.php';
+require_once PAX_SUP_DIR . 'includes/attachments.php';
 require_once PAX_SUP_DIR . 'includes/install.php';
 require_once PAX_SUP_DIR . 'includes/quickpanel.php';
 require_once PAX_SUP_DIR . 'includes/updater.php';
@@ -54,3 +55,4 @@ require_once PAX_SUP_DIR . 'rest/agent.php';
 require_once PAX_SUP_DIR . 'rest/callback.php';
 require_once PAX_SUP_DIR . 'rest/support.php';
 require_once PAX_SUP_DIR . 'rest/scheduler.php';
+require_once PAX_SUP_DIR . 'rest/attachment.php';
