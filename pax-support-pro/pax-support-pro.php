@@ -4,6 +4,8 @@
  * Description: Unified chat/tickets UI + console + settings. Clean, secure UX.
  * Version: 1.1.2
  * Author: Ahmad AlKhalaf
+ * Author URI: https://github.com/Black10998
+ * Update URI: https://github.com/Black10998/Black10998
  * Text Domain: pax-support-pro
  */
 
