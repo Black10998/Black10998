@@ -49,6 +49,9 @@ function pax_sup_render_console() {
         <?php if ( $notice ) : ?>
             <div class="notice notice-<?php echo 'error' === $notice['type'] ? 'error' : 'success'; ?>"><p><?php echo esc_html( $notice['message'] ); ?></p></div>
         <?php endif; ?>
+        
+        <?php pax_sup_render_analytics_dashboard(); ?>
+        
         <form method="get" class="pax-console__search" style="margin:12px 0; display:flex; gap:8px; align-items:center;">
             <input type="hidden" name="page" value="pax-support-console" />
             <input type="search" name="s" value="<?php echo esc_attr( $search ); ?>" class="regular-text" placeholder="<?php esc_attr_e( 'Search tickets…', 'pax-support-pro' ); ?>" />

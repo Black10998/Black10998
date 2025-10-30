@@ -48,6 +48,7 @@ require_once PAX_SUP_DIR . 'admin/settings.php';
 require_once PAX_SUP_DIR . 'admin/console.php';
 require_once PAX_SUP_DIR . 'admin/tickets.php';
 require_once PAX_SUP_DIR . 'admin/scheduler.php';
+require_once PAX_SUP_DIR . 'admin/dashboard-analytics-ui.php';
 require_once PAX_SUP_DIR . 'public/chat.php';
 require_once PAX_SUP_DIR . 'rest/chat.php';
 require_once PAX_SUP_DIR . 'rest/ticket.php';
