@@ -197,9 +197,10 @@
   display: none;
   flex-direction: column;
   gap: 2px;
-  z-index: calc(var(--pax-z) + 10);
+  z-index: calc(var(--pax-z) + 100);
   box-shadow: 0 12px 28px rgba(0, 0, 0, .55), 0 0 0 1px rgba(255, 255, 255, .05);
   animation: menuSlideIn 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: auto;
 }
 
 @keyframes menuSlideIn {
@@ -773,6 +774,17 @@ html.pax-speed #pax-launcher {
   #pax-chat {
     width: calc(100vw - 20px);
     height: min(72vh, 640px);
+  }
+  
+  #pax-head-menu {
+    min-width: 240px;
+    max-width: calc(100vw - 40px);
+    right: 10px;
+  }
+  
+  .pax-item {
+    padding: 14px 16px;
+    font-size: 15px;
   }
 }
 .pax-ticket-list {

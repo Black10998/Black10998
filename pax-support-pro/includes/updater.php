@@ -110,11 +110,18 @@ class PAX_Support_Pro_Updater {
         }
 
         $plugin_data = array(
+            'id'          => 'pax-support-pro/pax-support-pro.php',
             'slug'        => dirname( $this->plugin_basename ),
             'plugin'      => $this->plugin_basename,
             'new_version' => $release['version'],
             'url'         => $release['url'],
             'package'     => $release['download_url'],
+            'icons'       => array(),
+            'banners'     => array(),
+            'banners_rtl' => array(),
+            'tested'      => get_bloginfo( 'version' ),
+            'requires_php' => '7.4',
+            'compatibility' => new stdClass(),
         );
 
         if ( empty( $transient->response ) ) {
@@ -122,6 +129,9 @@ class PAX_Support_Pro_Updater {
         }
 
         $transient->response[ $this->plugin_basename ] = (object) $plugin_data;
+        
+        // Also set last_checked to ensure WordPress recognizes this as fresh data
+        $transient->last_checked = time();
 
         return $transient;
     }
@@ -139,14 +149,21 @@ class PAX_Support_Pro_Updater {
 
         $info = new stdClass();
         $info->name          = 'PAX Support Pro';
+        $info->slug          = dirname( $this->plugin_basename );
         $info->version       = $release['version'];
         $info->author        = '<a href="https://github.com/' . $this->github_repo . '">PAX Support</a>';
         $info->homepage      = 'https://github.com/' . $this->github_repo;
         $info->download_link = $release['download_url'];
+        $info->requires      = '5.8';
+        $info->tested        = get_bloginfo( 'version' );
+        $info->requires_php  = '7.4';
+        $info->last_updated  = ! empty( $release['published_at'] ) ? $release['published_at'] : current_time( 'mysql' );
         $info->sections      = array(
             'description' => ! empty( $release['description'] ) ? wp_kses_post( $release['description'] ) : __( 'Latest release details are available on GitHub.', 'pax-support-pro' ),
             'changelog'   => ! empty( $release['changelog'] ) ? wp_kses_post( $release['changelog'] ) : __( 'No changelog provided.', 'pax-support-pro' ),
         );
+        $info->banners       = array();
+        $info->icons         = array();
 
         return $info;
     }
@@ -339,6 +356,7 @@ class PAX_Support_Pro_Updater {
             'description'   => isset( $body['body'] ) ? wp_kses_post( $body['body'] ) : '',
             'changelog'     => isset( $body['body'] ) ? wp_kses_post( $body['body'] ) : '',
             'body'          => isset( $body['body'] ) ? $body['body'] : '',
+            'published_at'  => isset( $body['published_at'] ) ? $body['published_at'] : '',
         );
     }
 

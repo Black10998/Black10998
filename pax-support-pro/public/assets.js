@@ -55,13 +55,34 @@
     return;
   }
 
+  // Guest user handling - show login alert for menu button
   if (!isLoggedIn) {
     launcher.addEventListener('click', function (event) {
       event.preventDefault();
       const target = cfg.loginUrl || links.help || '/wp-login.php';
       window.location.href = target;
     });
-    chat.remove();
+    
+    // For guests, show login alert when clicking menu button
+    if (menuBtn) {
+      menuBtn.addEventListener('click', function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        alert(strings.loginRequired || 'Please log in to use support tools.');
+        const target = cfg.loginUrl || links.help || '/wp-login.php';
+        window.location.href = target;
+      });
+    }
+    
+    // Disable input and send button for guests
+    if (input) {
+      input.disabled = true;
+      input.placeholder = strings.loginRequired || 'Please log in to use support tools.';
+    }
+    if (sendBtn) {
+      sendBtn.disabled = true;
+    }
+    
     return;
   }
 
@@ -172,14 +193,37 @@
       wrap.classList.add('open');
     }
 
+    // Close on backdrop click
     wrap.addEventListener('click', function (event) {
       if (event.target === wrap) {
         close();
       }
     });
 
+    // Close button handler
     const closeBtn = wrap.querySelector('.pax-modal-close');
     closeBtn.addEventListener('click', close);
+    
+    // Close on ESC key
+    function handleEscape(event) {
+      if (event.key === 'Escape' && wrap.classList.contains('open')) {
+        close();
+      }
+    }
+    
+    // Add ESC listener when modal opens
+    const originalOpen = open;
+    open = function() {
+      originalOpen();
+      document.addEventListener('keydown', handleEscape);
+    };
+    
+    // Remove ESC listener when modal closes
+    const originalClose = close;
+    close = function() {
+      document.removeEventListener('keydown', handleEscape);
+      originalClose();
+    };
 
     return {
       element: wrap,
@@ -448,15 +492,27 @@
 
   if (menuBtn && menu) {
     menuBtn.addEventListener('click', function (event) {
+      event.preventDefault();
       event.stopPropagation();
-      menu.classList.toggle('open');
+      const isOpen = menu.classList.contains('open');
+      menu.classList.toggle('open', !isOpen);
     });
 
+    // Close menu when clicking outside
     document.addEventListener('click', function (event) {
-      if (!menu.contains(event.target) && event.target !== menuBtn) {
+      if (menu.classList.contains('open') && 
+          !menu.contains(event.target) && 
+          !menuBtn.contains(event.target)) {
         menu.classList.remove('open');
       }
     }, true);
+    
+    // Close menu on ESC key
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape' && menu.classList.contains('open')) {
+        menu.classList.remove('open');
+      }
+    });
   }
 
   function appendMessage(role, text) {
