@@ -47,6 +47,24 @@ function pax_sup_enqueue_admin_assets( $hook ) {
     pax_sup_enqueue_support_button_assets();
     wp_enqueue_style( 'wp-components' );
 
+    // Enqueue modern settings UI assets
+    if ( strpos( $hook, 'pax-support-settings' ) !== false ) {
+        wp_enqueue_style(
+            'pax-settings-modern',
+            PAX_SUP_URL . 'admin/css/settings-modern.css',
+            array(),
+            PAX_SUP_VER
+        );
+        
+        wp_enqueue_script(
+            'pax-settings-modern',
+            PAX_SUP_URL . 'admin/js/settings-modern.js',
+            array(),
+            PAX_SUP_VER,
+            true
+        );
+    }
+
     $options = pax_sup_get_options();
     $accent  = sanitize_hex_color( $options['color_accent'] ?? '#e53935' );
     if ( empty( $accent ) ) {
@@ -263,6 +281,7 @@ function pax_sup_render_settings() {
         return;
     }
 
+    // Handle form submission
     if ( 'POST' === $_SERVER['REQUEST_METHOD'] && check_admin_referer( 'pax_sup_save_settings' ) ) {
         $input = wp_unslash( $_POST );
 
@@ -329,210 +348,8 @@ function pax_sup_render_settings() {
 
     $options = pax_sup_get_options();
     $stored_notice = pax_sup_pull_admin_notice();
-    ?>
-    <div class="wrap">
-        <?php if ( $stored_notice ) : ?>
-            <div class="notice notice-<?php echo 'error' === $stored_notice['type'] ? 'error' : 'success'; ?> is-dismissible"><p><?php echo wp_kses_post( $stored_notice['message'] ); ?></p></div>
-        <?php endif; ?>
-        <?php if ( current_user_can( 'manage_options' ) ) : ?>
-            <div class="pax-support-dev-cta">
-                <a class="pax-support-dev-button" href="https://www.paypal.me/AhmadAlkhalaf29" target="_blank" rel="noopener noreferrer" data-pax-support-button="1">
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21.35 10.55 20C5.4 15.36 2 12.27 2 8.5A4.5 4.5 0 0 1 6.5 4 4.5 4.5 0 0 1 12 6.09 4.5 4.5 0 0 1 17.5 4 4.5 4.5 0 0 1 22 8.5c0 3.77-3.4 6.86-8.55 11.54Z"/></svg>
-                    <?php esc_html_e( 'Support Developer ❤️', 'pax-support-pro' ); ?>
-                </a>
-            </div>
-        <?php endif; ?>
-        <h1><?php esc_html_e( 'PAX Support Pro — Settings', 'pax-support-pro' ); ?></h1>
-        <form method="post" action="">
-            <?php wp_nonce_field( 'pax_sup_save_settings' ); ?>
-
-            <h2 class="title"><?php esc_html_e( 'General', 'pax-support-pro' ); ?></h2>
-            <table class="form-table" role="presentation">
-                <tr>
-                    <th scope="row"><?php esc_html_e( 'Enable plugin', 'pax-support-pro' ); ?></th>
-                    <td><label><input type="checkbox" name="enabled" <?php checked( $options['enabled'] ); ?>> <?php esc_html_e( 'Active', 'pax-support-pro' ); ?></label></td>
-                </tr>
-                <tr>
-                    <th scope="row"><?php esc_html_e( 'Features', 'pax-support-pro' ); ?></th>
-                    <td>
-                        <label><input type="checkbox" name="enable_chat" <?php checked( $options['enable_chat'] ); ?>> <?php esc_html_e( 'Chat', 'pax-support-pro' ); ?></label><br>
-                        <label><input type="checkbox" name="enable_ticket" <?php checked( $options['enable_ticket'] ); ?>> <?php esc_html_e( 'Tickets', 'pax-support-pro' ); ?></label><br>
-                        <label><input type="checkbox" name="enable_console" <?php checked( $options['enable_console'] ); ?>> <?php esc_html_e( 'Console (admin)', 'pax-support-pro' ); ?></label><br>
-                        <label><input type="checkbox" name="enable_speed" <?php checked( $options['enable_speed'] ); ?>> <?php esc_html_e( 'Super Speed', 'pax-support-pro' ); ?></label><br>
-                        <label><input type="checkbox" name="enable_offline_guard" <?php checked( $options['enable_offline_guard'] ); ?>> <?php esc_html_e( 'Offline Guardian', 'pax-support-pro' ); ?></label>
-                    </td>
-                </tr>
-                <tr>
-                    <th scope="row"><?php esc_html_e( 'Launcher position', 'pax-support-pro' ); ?></th>
-                    <td>
-                        <select name="launcher_position">
-                            <?php foreach ( array( 'bottom-left', 'bottom-right', 'top-left', 'top-right' ) as $pos ) : ?>
-                                <option value="<?php echo esc_attr( $pos ); ?>" <?php selected( $options['launcher_position'], $pos ); ?>><?php echo esc_html( $pos ); ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                        <label style="margin-left:10px;"><input type="checkbox" name="launcher_auto_open" <?php checked( $options['launcher_auto_open'] ); ?>> <?php esc_html_e( 'Auto-open chat on click', 'pax-support-pro' ); ?></label>
-                        <label style="margin-left:10px;"><input type="checkbox" name="toggle_on_click" <?php checked( $options['toggle_on_click'] ); ?>> <?php esc_html_e( 'Click toggles (open/close)', 'pax-support-pro' ); ?></label>
-                    </td>
-                </tr>
-            </table>
-
-            <h2 class="title"><?php esc_html_e( 'Brand & Colors', 'pax-support-pro' ); ?></h2>
-            <table class="form-table" role="presentation">
-                <tr>
-                    <th scope="row"><?php esc_html_e( 'Brand name', 'pax-support-pro' ); ?></th>
-                    <td><input type="text" name="brand_name" value="<?php echo esc_attr( $options['brand_name'] ); ?>" class="regular-text"></td>
-                </tr>
-                <tr>
-                    <th scope="row"><?php esc_html_e( 'Colors', 'pax-support-pro' ); ?></th>
-                    <td>
-                        <?php esc_html_e( 'Accent', 'pax-support-pro' ); ?> <input type="text" name="color_accent" value="<?php echo esc_attr( $options['color_accent'] ); ?>" class="small-text" />
-                        &nbsp;<?php esc_html_e( 'BG', 'pax-support-pro' ); ?> <input type="text" name="color_bg" value="<?php echo esc_attr( $options['color_bg'] ); ?>" class="small-text" />
-                        &nbsp;<?php esc_html_e( 'Panel', 'pax-support-pro' ); ?> <input type="text" name="color_panel" value="<?php echo esc_attr( $options['color_panel'] ); ?>" class="small-text" />
-                        &nbsp;<?php esc_html_e( 'Border', 'pax-support-pro' ); ?> <input type="text" name="color_border" value="<?php echo esc_attr( $options['color_border'] ); ?>" class="small-text" />
-                        &nbsp;<?php esc_html_e( 'Text', 'pax-support-pro' ); ?> <input type="text" name="color_text" value="<?php echo esc_attr( $options['color_text'] ); ?>" class="small-text" />
-                        &nbsp;<?php esc_html_e( 'Sub', 'pax-support-pro' ); ?> <input type="text" name="color_sub" value="<?php echo esc_attr( $options['color_sub'] ); ?>" class="small-text" />
-                    </td>
-                </tr>
-            </table>
-
-            <h2 class="title"><?php esc_html_e( 'AI & Automation', 'pax-support-pro' ); ?></h2>
-            <table class="form-table" role="presentation">
-                <tr>
-                    <th scope="row"><?php esc_html_e( 'Enable AI Assistant', 'pax-support-pro' ); ?></th>
-                    <td><label><input type="checkbox" name="ai_assistant_enabled" <?php checked( $options['ai_assistant_enabled'] ); ?>> <?php esc_html_e( 'Enabled', 'pax-support-pro' ); ?></label></td>
-                </tr>
-                <tr>
-                    <th scope="row"><?php esc_html_e( 'Allow OpenAI integration', 'pax-support-pro' ); ?></th>
-                    <td><label><input type="checkbox" name="openai_enabled" <?php checked( $options['openai_enabled'] ); ?>> <?php esc_html_e( 'Use OpenAI API', 'pax-support-pro' ); ?></label></td>
-                </tr>
-                <tr>
-                    <th scope="row"><?php esc_html_e( 'API Key', 'pax-support-pro' ); ?></th>
-                    <td>
-                        <input type="password" name="openai_key" value="<?php echo esc_attr( $options['openai_key'] ); ?>" class="regular-text" autocomplete="off">
-                        <p class="description"><?php esc_html_e( 'Or define PXA_OPENAI_API_KEY in wp-config.php.', 'pax-support-pro' ); ?></p>
-                    </td>
-                </tr>
-                <tr>
-                    <th scope="row"><?php esc_html_e( 'Model', 'pax-support-pro' ); ?></th>
-                    <td><input type="text" name="openai_model" value="<?php echo esc_attr( $options['openai_model'] ); ?>" class="regular-text"></td>
-                </tr>
-                <tr>
-                    <th scope="row"><?php esc_html_e( 'Temperature', 'pax-support-pro' ); ?></th>
-                    <td><input type="number" step="0.01" min="0" max="1" name="openai_temperature" value="<?php echo esc_attr( $options['openai_temperature'] ); ?>" class="small-text"></td>
-                </tr>
-            </table>
-
-            <h2 class="title"><?php esc_html_e( 'Backups & Updates', 'pax-support-pro' ); ?></h2>
-            <table class="form-table" role="presentation">
-                <tr>
-                    <th scope="row"><?php esc_html_e( 'Enable auto updates', 'pax-support-pro' ); ?></th>
-                    <td><label><input type="checkbox" name="auto_update_enabled" <?php checked( $options['auto_update_enabled'] ); ?>> <?php esc_html_e( 'Automatically check for updates', 'pax-support-pro' ); ?></label></td>
-                </tr>
-                <tr>
-                    <th scope="row"><?php esc_html_e( 'Update frequency', 'pax-support-pro' ); ?></th>
-                    <td>
-                        <select name="update_check_frequency">
-                            <option value="daily" <?php selected( $options['update_check_frequency'], 'daily' ); ?>><?php esc_html_e( 'Daily', 'pax-support-pro' ); ?></option>
-                            <option value="weekly" <?php selected( $options['update_check_frequency'], 'weekly' ); ?>><?php esc_html_e( 'Weekly', 'pax-support-pro' ); ?></option>
-                        </select>
-                    </td>
-                </tr>
-                <tr>
-                    <th scope="row"><?php esc_html_e( 'Backup targets', 'pax-support-pro' ); ?></th>
-                    <td>
-                        <label><input type="checkbox" name="backup_local_enabled" <?php checked( $options['backup_local_enabled'] ); ?>> <?php esc_html_e( 'Store local backups', 'pax-support-pro' ); ?></label><br>
-                        <label><input type="checkbox" name="backup_google_drive" <?php checked( $options['backup_google_drive'] ); ?>> <?php esc_html_e( 'Sync to Google Drive', 'pax-support-pro' ); ?></label><br>
-                        <label><input type="checkbox" name="backup_dropbox" <?php checked( $options['backup_dropbox'] ); ?>> <?php esc_html_e( 'Sync to Dropbox', 'pax-support-pro' ); ?></label>
-                    </td>
-                </tr>
-                <tr>
-                    <th scope="row"><?php esc_html_e( 'Manual backup', 'pax-support-pro' ); ?></th>
-                    <td>
-                        <a class="button" href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=pax_sup_backup_now' ), 'pax_sup_backup_now' ) ); ?>"><?php esc_html_e( 'Backup Now', 'pax-support-pro' ); ?></a>
-                        <p class="description"><?php esc_html_e( 'Creates a fresh archive before syncing to cloud providers.', 'pax-support-pro' ); ?></p>
-                    </td>
-                </tr>
-            </table>
-
-            <h2 class="title"><?php esc_html_e( 'Live Agent', 'pax-support-pro' ); ?></h2>
-            <table class="form-table" role="presentation">
-                <tr>
-                    <th scope="row"><?php esc_html_e( 'Agent email', 'pax-support-pro' ); ?></th>
-                    <td><input type="email" name="live_agent_email" value="<?php echo esc_attr( $options['live_agent_email'] ); ?>" class="regular-text"></td>
-                </tr>
-                <tr>
-                    <th scope="row"><?php esc_html_e( 'Callback', 'pax-support-pro' ); ?></th>
-                    <td><label><input type="checkbox" name="callback_enabled" <?php checked( $options['callback_enabled'] ); ?>> <?php esc_html_e( 'Allow “Request a Callback”', 'pax-support-pro' ); ?></label></td>
-                </tr>
-            </table>
-
-            <h2 class="title"><?php esc_html_e( 'Links & Access', 'pax-support-pro' ); ?></h2>
-            <table class="form-table" role="presentation">
-                <tr>
-                    <th scope="row"><?php esc_html_e( 'Help Center URL', 'pax-support-pro' ); ?></th>
-                    <td><input type="url" name="help_center_url" value="<?php echo esc_url( $options['help_center_url'] ); ?>" class="regular-text"></td>
-                </tr>
-                <tr>
-                    <th scope="row"><?php esc_html_e( 'Console capability', 'pax-support-pro' ); ?></th>
-                    <td><input type="text" name="console_cap" value="<?php echo esc_attr( $options['console_cap'] ); ?>" class="regular-text"></td>
-                </tr>
-                <tr>
-                    <th scope="row"><?php esc_html_e( 'Ticket Cooldown (days)', 'pax-support-pro' ); ?></th>
-                    <td><input type="number" min="0" name="ticket_cooldown_days" value="<?php echo intval( $options['ticket_cooldown_days'] ); ?>" style="width:90px"> <span class="description"><?php esc_html_e( '0 = disabled', 'pax-support-pro' ); ?></span></td>
-                </tr>
-            </table>
-
-            <h2 class="title"><?php esc_html_e( 'Chat Menu Items', 'pax-support-pro' ); ?></h2>
-            <p class="description"><?php esc_html_e( 'Customize the labels and visibility of menu items in the chat interface. Changes take effect immediately after saving.', 'pax-support-pro' ); ?></p>
-            <table class="form-table" role="presentation">
-                <?php
-                $menu_items = isset( $options['chat_menu_items'] ) && is_array( $options['chat_menu_items'] ) 
-                    ? $options['chat_menu_items'] 
-                    : pax_sup_default_menu_items();
-                
-                $menu_labels = array(
-                    'chat'          => __( 'Open Chat', 'pax-support-pro' ),
-                    'ticket'        => __( 'New Ticket', 'pax-support-pro' ),
-                    'help'          => __( 'Help Center', 'pax-support-pro' ),
-                    'speed'         => __( 'Super Speed', 'pax-support-pro' ),
-                    'agent'         => __( 'Live Agent', 'pax-support-pro' ),
-                    'whatsnew'      => __( 'What\'s New', 'pax-support-pro' ),
-                    'troubleshooter'=> __( 'Troubleshooter', 'pax-support-pro' ),
-                    'diag'          => __( 'Diagnostics', 'pax-support-pro' ),
-                    'callback'      => __( 'Request a Callback', 'pax-support-pro' ),
-                    'order'         => __( 'Order Lookup', 'pax-support-pro' ),
-                    'myreq'         => __( 'My Request', 'pax-support-pro' ),
-                    'feedback'      => __( 'Feedback', 'pax-support-pro' ),
-                    'donate'        => __( 'Donate', 'pax-support-pro' ),
-                );
-
-                foreach ( $menu_items as $key => $item ) :
-                    $label = isset( $item['label'] ) ? $item['label'] : ( $menu_labels[ $key ] ?? $key );
-                    $visible = isset( $item['visible'] ) ? $item['visible'] : 1;
-                    $display_name = $menu_labels[ $key ] ?? ucfirst( str_replace( '_', ' ', $key ) );
-                ?>
-                <tr>
-                    <th scope="row"><?php echo esc_html( $display_name ); ?></th>
-                    <td>
-                        <input type="text" 
-                               name="menu_items[<?php echo esc_attr( $key ); ?>][label]" 
-                               value="<?php echo esc_attr( $label ); ?>" 
-                               class="regular-text" 
-                               placeholder="<?php echo esc_attr( $display_name ); ?>">
-                        <label style="margin-left: 15px;">
-                            <input type="checkbox" 
-                                   name="menu_items[<?php echo esc_attr( $key ); ?>][visible]" 
-                                   value="1" 
-                                   <?php checked( $visible ); ?>>
-                            <?php esc_html_e( 'Visible', 'pax-support-pro' ); ?>
-                        </label>
-                    </td>
-                </tr>
-                <?php endforeach; ?>
-            </table>
-
-            <?php submit_button( __( 'Save Changes', 'pax-support-pro' ) ); ?>
-        </form>
-    </div>
-    <?php
+    
+    // Include modern UI rendering
+    require_once plugin_dir_path( __FILE__ ) . 'settings-modern-ui.php';
+    pax_sup_render_modern_settings( $options, $stored_notice );
 }
