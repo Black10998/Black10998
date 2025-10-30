@@ -23,7 +23,7 @@ class PAX_Support_Pro_Updater {
 
     private $last_backup_path = '';
 
-    private $github_repo = 'AhmadAlkhalaf/pax-support-pro';
+    private $github_repo = 'Black10998/Black10998';
 
     public static function instance() {
         if ( null === self::$instance ) {
@@ -83,6 +83,21 @@ class PAX_Support_Pro_Updater {
         wp_update_plugins();
     }
 
+    /**
+     * Force check for updates (clears cache)
+     */
+    public function force_check_updates() {
+        delete_site_transient( 'pax_sup_release_meta' );
+        delete_site_transient( 'update_plugins' );
+        $this->release_meta = null;
+        
+        // Trigger update check
+        require_once ABSPATH . 'wp-admin/includes/update.php';
+        wp_update_plugins();
+        
+        return $this->get_release_meta();
+    }
+
     public function filter_plugin_updates( $transient ) {
         if ( empty( $transient ) || ! is_object( $transient ) ) {
             $transient = new stdClass();
@@ -125,8 +140,8 @@ class PAX_Support_Pro_Updater {
         $info = new stdClass();
         $info->name          = 'PAX Support Pro';
         $info->version       = $release['version'];
-        $info->author        = '<a href="https://www.paypal.me/AhmadAlkhalaf29">Ahmad AlKhalaf</a>';
-        $info->homepage      = $release['url'];
+        $info->author        = '<a href="https://github.com/' . $this->github_repo . '">PAX Support</a>';
+        $info->homepage      = 'https://github.com/' . $this->github_repo;
         $info->download_link = $release['download_url'];
         $info->sections      = array(
             'description' => ! empty( $release['description'] ) ? wp_kses_post( $release['description'] ) : __( 'Latest release details are available on GitHub.', 'pax-support-pro' ),
@@ -246,12 +261,32 @@ class PAX_Support_Pro_Updater {
         }
 
         $cached = get_site_transient( 'pax_sup_release_meta' );
-        if ( is_array( $cached ) ) {
+        if ( is_array( $cached ) && ! empty( $cached['version'] ) ) {
             $this->release_meta = $cached;
-
             return $this->release_meta;
         }
 
+        // Try to get latest release first
+        $release = $this->fetch_latest_release();
+        
+        // Fallback to latest commit if no release exists
+        if ( empty( $release['version'] ) ) {
+            $release = $this->fetch_latest_commit();
+        }
+
+        // Cache the result
+        if ( ! empty( $release['version'] ) ) {
+            $this->release_meta = $release;
+            set_site_transient( 'pax_sup_release_meta', $release, 6 * HOUR_IN_SECONDS );
+        }
+
+        return $release;
+    }
+
+    /**
+     * Fetch latest release from GitHub
+     */
+    private function fetch_latest_release() {
         $request = wp_remote_get(
             'https://api.github.com/repos/' . $this->github_repo . '/releases/latest',
             array(
@@ -273,7 +308,7 @@ class PAX_Support_Pro_Updater {
         }
 
         $body = json_decode( wp_remote_retrieve_body( $request ), true );
-        if ( ! is_array( $body ) ) {
+        if ( ! is_array( $body ) || empty( $body['tag_name'] ) ) {
             return array();
         }
 
@@ -291,19 +326,74 @@ class PAX_Support_Pro_Updater {
             }
         }
 
-        $release = array(
-            'version'       => isset( $body['tag_name'] ) ? ltrim( (string) $body['tag_name'], 'v' ) : '',
+        // If no zip asset, use zipball_url
+        if ( empty( $download_url ) && ! empty( $body['zipball_url'] ) ) {
+            $download_url = $body['zipball_url'];
+        }
+
+        return array(
+            'version'       => ltrim( (string) $body['tag_name'], 'v' ),
             'url'           => isset( $body['html_url'] ) ? esc_url_raw( $body['html_url'] ) : '',
             'download_url'  => esc_url_raw( $download_url ),
             'signature_url' => esc_url_raw( $signature_url ),
             'description'   => isset( $body['body'] ) ? wp_kses_post( $body['body'] ) : '',
             'changelog'     => isset( $body['body'] ) ? wp_kses_post( $body['body'] ) : '',
+            'body'          => isset( $body['body'] ) ? $body['body'] : '',
+        );
+    }
+
+    /**
+     * Fetch latest commit as fallback
+     */
+    private function fetch_latest_commit() {
+        $request = wp_remote_get(
+            'https://api.github.com/repos/' . $this->github_repo . '/commits/main',
+            array(
+                'timeout' => 15,
+                'headers' => array(
+                    'Accept'     => 'application/vnd.github+json',
+                    'User-Agent' => 'PAX-Support-Pro/' . PAX_SUP_VER,
+                ),
+            )
         );
 
-        $this->release_meta = $release;
-        set_site_transient( 'pax_sup_release_meta', $release, 6 * HOUR_IN_SECONDS );
+        if ( is_wp_error( $request ) ) {
+            return array();
+        }
 
-        return $release;
+        $code = wp_remote_retrieve_response_code( $request );
+        if ( 200 !== $code ) {
+            return array();
+        }
+
+        $body = json_decode( wp_remote_retrieve_body( $request ), true );
+        if ( ! is_array( $body ) || empty( $body['sha'] ) ) {
+            return array();
+        }
+
+        // Use commit date as version (format: YYYY.MM.DD)
+        $commit_date = isset( $body['commit']['committer']['date'] ) 
+            ? $body['commit']['committer']['date'] 
+            : current_time( 'mysql' );
+        
+        $version = date( 'Y.m.d', strtotime( $commit_date ) );
+        
+        // Use zipball URL for download
+        $download_url = 'https://github.com/' . $this->github_repo . '/archive/refs/heads/main.zip';
+        
+        $commit_message = isset( $body['commit']['message'] ) ? $body['commit']['message'] : '';
+        $commit_url = isset( $body['html_url'] ) ? $body['html_url'] : '';
+
+        return array(
+            'version'       => $version,
+            'url'           => esc_url_raw( $commit_url ),
+            'download_url'  => esc_url_raw( $download_url ),
+            'signature_url' => '',
+            'description'   => 'Latest commit: ' . esc_html( substr( $commit_message, 0, 100 ) ),
+            'changelog'     => 'Latest commit: ' . esc_html( $commit_message ),
+            'body'          => $commit_message,
+            'is_commit'     => true,
+        );
     }
 
     private function verify_signature( $package_path, $signature_content ) {
