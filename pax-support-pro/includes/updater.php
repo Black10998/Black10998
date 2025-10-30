@@ -43,6 +43,8 @@ class PAX_Support_Pro_Updater {
         add_filter( 'upgrader_pre_download', array( $this, 'before_download' ), 10, 4 );
         add_filter( 'upgrader_install_package_result', array( $this, 'maybe_restore_on_failure' ), 10, 2 );
         add_filter( 'upgrader_post_install', array( $this, 'cleanup_after_install' ), 10, 3 );
+        add_action( 'upgrader_process_complete', array( $this, 'after_update_complete' ), 10, 2 );
+        add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_update_modal_assets' ) );
     }
 
     public function maybe_schedule_checks() {
@@ -185,9 +187,40 @@ class PAX_Support_Pro_Updater {
 
         if ( is_wp_error( $result ) && $this->last_backup_path ) {
             pax_sup_restore_backup( $this->last_backup_path );
+            
+            // Set transient for error modal
+            set_transient(
+                'pax_sup_update_failed',
+                array(
+                    'error'     => $result->get_error_message(),
+                    'timestamp' => time()
+                ),
+                300 // 5 minutes
+            );
+            
+            // Add redirect parameter
+            add_filter( 'wp_redirect', array( $this, 'add_update_failure_param' ) );
         }
 
         return $result;
+    }
+
+    /**
+     * Add update failure parameter to redirect URL
+     */
+    public function add_update_failure_param( $location ) {
+        $transient = get_transient( 'pax_sup_update_failed' );
+        if ( $transient ) {
+            delete_transient( 'pax_sup_update_failed' );
+            $location = add_query_arg(
+                array(
+                    'pax_update_status' => 'failed',
+                    'pax_update_error'  => urlencode( $transient['error'] )
+                ),
+                $location
+            );
+        }
+        return $location;
     }
 
     public function cleanup_after_install( $result, $hook_extra, $upgrader ) {
@@ -298,6 +331,124 @@ class PAX_Support_Pro_Updater {
         }
 
         return true;
+    }
+
+    /**
+     * Enqueue update modal assets
+     */
+    public function enqueue_update_modal_assets() {
+        // Only load on admin pages
+        if ( ! is_admin() ) {
+            return;
+        }
+
+        wp_enqueue_style(
+            'pax-update-modals',
+            PAX_SUP_URL . 'admin/css/update-modals.css',
+            array(),
+            PAX_SUP_VER
+        );
+
+        wp_enqueue_script(
+            'pax-update-modals',
+            PAX_SUP_URL . 'admin/js/update-modals.js',
+            array(),
+            PAX_SUP_VER,
+            true
+        );
+    }
+
+    /**
+     * Handle after update complete
+     */
+    public function after_update_complete( $upgrader_object, $options ) {
+        // Check if this is our plugin
+        if ( 'update' !== $options['action'] || 'plugin' !== $options['type'] ) {
+            return;
+        }
+
+        // Check if our plugin was updated
+        $our_plugin = false;
+        if ( isset( $options['plugins'] ) ) {
+            foreach ( $options['plugins'] as $plugin ) {
+                if ( $plugin === $this->plugin_basename ) {
+                    $our_plugin = true;
+                    break;
+                }
+            }
+        } elseif ( isset( $options['plugin'] ) && $options['plugin'] === $this->plugin_basename ) {
+            $our_plugin = true;
+        }
+
+        if ( ! $our_plugin ) {
+            return;
+        }
+
+        // Get the new version
+        $plugin_data = get_plugin_data( PAX_SUP_FILE );
+        $new_version = $plugin_data['Version'];
+
+        // Get changelog from release meta
+        $changelog = array();
+        if ( $this->release_meta && isset( $this->release_meta->body ) ) {
+            $changelog = $this->parse_changelog( $this->release_meta->body );
+        }
+
+        // Set transient for modal display
+        set_transient(
+            'pax_sup_update_success',
+            array(
+                'version'   => $new_version,
+                'changelog' => $changelog,
+                'timestamp' => time()
+            ),
+            300 // 5 minutes
+        );
+
+        // Add redirect parameter
+        add_filter( 'wp_redirect', array( $this, 'add_update_success_param' ) );
+    }
+
+    /**
+     * Add update success parameter to redirect URL
+     */
+    public function add_update_success_param( $location ) {
+        $transient = get_transient( 'pax_sup_update_success' );
+        if ( $transient ) {
+            delete_transient( 'pax_sup_update_success' );
+            $location = add_query_arg(
+                array(
+                    'pax_update_status'  => 'success',
+                    'pax_update_version' => $transient['version']
+                ),
+                $location
+            );
+        }
+        return $location;
+    }
+
+    /**
+     * Parse changelog from release body
+     */
+    private function parse_changelog( $body ) {
+        $changelog = array();
+        
+        // Split by lines
+        $lines = explode( "\n", $body );
+        
+        foreach ( $lines as $line ) {
+            $line = trim( $line );
+            
+            // Look for bullet points or numbered lists
+            if ( preg_match( '/^[-*•]\s+(.+)$/', $line, $matches ) ) {
+                $changelog[] = trim( $matches[1] );
+            } elseif ( preg_match( '/^\d+\.\s+(.+)$/', $line, $matches ) ) {
+                $changelog[] = trim( $matches[1] );
+            }
+        }
+        
+        // Limit to 5 items
+        return array_slice( $changelog, 0, 5 );
     }
 }
 
