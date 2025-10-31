@@ -24,6 +24,8 @@ class PAX_Support_Pro_Updater {
     private $last_backup_path = '';
 
     private $github_repo = 'Black10998/Black10998';
+    
+    private $cache_dir = '';
 
     public static function instance() {
         if ( null === self::$instance ) {
@@ -35,6 +37,10 @@ class PAX_Support_Pro_Updater {
 
     private function __construct() {
         $this->plugin_basename = plugin_basename( PAX_SUP_FILE );
+        $this->cache_dir = PAX_SUP_DIR . 'CheckOptData';
+        
+        // Ensure cache directory exists
+        $this->ensure_cache_directory();
 
         add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'filter_plugin_updates' ) );
         add_filter( 'plugins_api', array( $this, 'plugins_api' ), 10, 3 );
@@ -46,6 +52,65 @@ class PAX_Support_Pro_Updater {
         add_action( 'upgrader_process_complete', array( $this, 'after_update_complete' ), 10, 2 );
         add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_update_modal_assets' ) );
         add_action( 'rest_api_init', array( $this, 'register_rest_routes' ) );
+    }
+    
+    /**
+     * Ensure cache directory exists with proper permissions
+     */
+    private function ensure_cache_directory() {
+        if ( ! file_exists( $this->cache_dir ) ) {
+            wp_mkdir_p( $this->cache_dir );
+            
+            // Add .htaccess to protect directory
+            $htaccess_file = $this->cache_dir . '/.htaccess';
+            if ( ! file_exists( $htaccess_file ) ) {
+                file_put_contents( $htaccess_file, "Deny from all\n" );
+            }
+            
+            // Add index.php to prevent directory listing
+            $index_file = $this->cache_dir . '/index.php';
+            if ( ! file_exists( $index_file ) ) {
+                file_put_contents( $index_file, "<?php\n// Silence is golden.\n" );
+            }
+        }
+        
+        // Ensure directory is writable
+        if ( file_exists( $this->cache_dir ) && ! is_writable( $this->cache_dir ) ) {
+            @chmod( $this->cache_dir, 0755 );
+        }
+    }
+    
+    /**
+     * Get cache file path
+     */
+    private function get_cache_file( $name = 'status.json' ) {
+        return $this->cache_dir . '/' . $name;
+    }
+    
+    /**
+     * Save update status to cache file
+     */
+    private function save_update_cache( $data ) {
+        $cache_file = $this->get_cache_file();
+        $data['cached_at'] = time();
+        file_put_contents( $cache_file, json_encode( $data, JSON_PRETTY_PRINT ) );
+    }
+    
+    /**
+     * Load update status from cache file
+     */
+    private function load_update_cache() {
+        $cache_file = $this->get_cache_file();
+        if ( file_exists( $cache_file ) ) {
+            $content = file_get_contents( $cache_file );
+            $data = json_decode( $content, true );
+            
+            // Check if cache is still valid (6 hours)
+            if ( isset( $data['cached_at'] ) && ( time() - $data['cached_at'] ) < 6 * HOUR_IN_SECONDS ) {
+                return $data;
+            }
+        }
+        return null;
     }
 
     /**
@@ -63,6 +128,78 @@ class PAX_Support_Pro_Updater {
                 },
             )
         );
+        
+        register_rest_route(
+            PAX_SUP_REST_NS,
+            '/update-diagnostics',
+            array(
+                'methods'             => 'GET',
+                'callback'            => array( $this, 'rest_update_diagnostics' ),
+                'permission_callback' => function() {
+                    return current_user_can( 'update_plugins' );
+                },
+            )
+        );
+    }
+    
+    /**
+     * REST endpoint for update system diagnostics
+     */
+    public function rest_update_diagnostics( $request ) {
+        $options = pax_sup_get_options();
+        $cache_file = $this->get_cache_file();
+        
+        $diagnostics = array(
+            'cache_directory' => array(
+                'path'     => $this->cache_dir,
+                'exists'   => file_exists( $this->cache_dir ),
+                'writable' => is_writable( $this->cache_dir ),
+                'permissions' => file_exists( $this->cache_dir ) ? substr( sprintf( '%o', fileperms( $this->cache_dir ) ), -4 ) : 'N/A',
+            ),
+            'cache_file' => array(
+                'path'     => $cache_file,
+                'exists'   => file_exists( $cache_file ),
+                'size'     => file_exists( $cache_file ) ? filesize( $cache_file ) : 0,
+                'modified' => file_exists( $cache_file ) ? date( 'Y-m-d H:i:s', filemtime( $cache_file ) ) : 'N/A',
+            ),
+            'settings' => array(
+                'auto_update_enabled' => ! empty( $options['auto_update_enabled'] ),
+                'update_check_frequency' => $options['update_check_frequency'] ?? 'daily',
+            ),
+            'scheduled_checks' => array(
+                'next_run' => wp_next_scheduled( 'pax_sup_check_updates' ) ? date( 'Y-m-d H:i:s', wp_next_scheduled( 'pax_sup_check_updates' ) ) : 'Not scheduled',
+            ),
+            'github_connection' => array(
+                'repo' => $this->github_repo,
+                'api_url' => 'https://api.github.com/repos/' . $this->github_repo . '/releases/latest',
+            ),
+            'current_version' => PAX_SUP_VER,
+        );
+        
+        // Test GitHub connection
+        $test_request = wp_remote_get(
+            'https://api.github.com/repos/' . $this->github_repo . '/releases/latest',
+            array(
+                'timeout' => 10,
+                'headers' => array(
+                    'Accept'     => 'application/vnd.github+json',
+                    'User-Agent' => 'PAX-Support-Pro/' . PAX_SUP_VER,
+                ),
+            )
+        );
+        
+        if ( is_wp_error( $test_request ) ) {
+            $diagnostics['github_connection']['status'] = 'error';
+            $diagnostics['github_connection']['error'] = $test_request->get_error_message();
+        } else {
+            $diagnostics['github_connection']['status'] = 'success';
+            $diagnostics['github_connection']['response_code'] = wp_remote_retrieve_response_code( $test_request );
+        }
+        
+        return rest_ensure_response( array(
+            'success' => true,
+            'diagnostics' => $diagnostics,
+        ) );
     }
 
     /**
@@ -141,6 +278,12 @@ class PAX_Support_Pro_Updater {
         delete_site_transient( 'pax_sup_release_meta' );
         delete_site_transient( 'update_plugins' );
         $this->release_meta = null;
+        
+        // Clear file cache
+        $cache_file = $this->get_cache_file();
+        if ( file_exists( $cache_file ) ) {
+            @unlink( $cache_file );
+        }
         
         // Trigger update check
         require_once ABSPATH . 'wp-admin/includes/update.php';
@@ -328,9 +471,19 @@ class PAX_Support_Pro_Updater {
             return $this->release_meta;
         }
 
+        // Try file cache first
+        $file_cached = $this->load_update_cache();
+        if ( $file_cached && ! empty( $file_cached['version'] ) ) {
+            $this->release_meta = $file_cached;
+            return $this->release_meta;
+        }
+
+        // Try transient cache
         $cached = get_site_transient( 'pax_sup_release_meta' );
         if ( is_array( $cached ) && ! empty( $cached['version'] ) ) {
             $this->release_meta = $cached;
+            // Also save to file cache
+            $this->save_update_cache( $cached );
             return $this->release_meta;
         }
 
@@ -342,10 +495,11 @@ class PAX_Support_Pro_Updater {
             $release = $this->fetch_latest_commit();
         }
 
-        // Cache the result
+        // Cache the result in both places
         if ( ! empty( $release['version'] ) ) {
             $this->release_meta = $release;
             set_site_transient( 'pax_sup_release_meta', $release, 6 * HOUR_IN_SECONDS );
+            $this->save_update_cache( $release );
         }
 
         return $release;

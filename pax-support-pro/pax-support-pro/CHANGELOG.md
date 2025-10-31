@@ -5,6 +5,41 @@ All notable changes to PAX Support Pro will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.3] - 2025-10-31
+
+### 🔧 Update System Enhancements
+
+#### Added
+- **CheckOptData Folder** - Dedicated cache directory for update status
+  - Automatically created with proper permissions (0755)
+  - Protected with .htaccess and index.php
+  - Stores update status in status.json
+  - 6-hour cache validity
+
+- **File-Based Caching** - Dual caching system (transient + file)
+  - Faster update checks with file cache
+  - Persistent cache across transient expiration
+  - Automatic cache cleanup on force check
+
+- **Update Diagnostics Endpoint** - New REST API endpoint for system diagnostics
+  - `/wp-json/pax/v1/update-diagnostics`
+  - Check cache directory status
+  - Verify GitHub connection
+  - View scheduled update checks
+  - Monitor cache file status
+
+#### Improved
+- **Cache Management** - Enhanced caching with dual-layer approach
+- **Directory Security** - Protected cache directory from direct access
+- **Update Reliability** - Better handling of GitHub API responses
+- **Error Logging** - Improved error tracking for update checks
+
+#### Technical
+- Cache directory: `/wp-content/plugins/pax-support-pro/CheckOptData/`
+- Cache file: `status.json` with timestamp
+- Automatic directory creation on plugin load
+- Proper permission handling (0755)
+
 ## [4.0.2] - 2025-10-31
 
 ### 🎨 Chat UI Enhancements
