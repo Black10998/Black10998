@@ -3,7 +3,7 @@
  * Plugin Name: PAX Support Pro
  * Plugin URI: https://github.com/Black10998/Black10998
  * Description: Professional support ticket system with modern admin UI, real-time chat, AJAX-powered scheduler, and comprehensive callback management. Features include live chat reactions, inline editing, drag & drop, advanced analytics, and auto-update system.
- * Version: 4.0.1
+ * Version: 4.0.2
  * Requires at least: 5.0
  * Requires PHP: 7.4
  * Author: Ahmad AlKhalaf
@@ -15,7 +15,7 @@
  * Domain Path: /languages
  * 
  * @package PAX_Support_Pro
- * @version 4.0.1
+ * @version 4.0.2
  * @since 1.0.0
  */
 
@@ -40,7 +40,7 @@ if ( ! defined( 'PAX_SUP_NS' ) ) {
 }
 
 if ( ! defined( 'PAX_SUP_VER' ) ) {
-    define( 'PAX_SUP_VER', '4.0.1' );
+    define( 'PAX_SUP_VER', '4.0.2' );
 }
 
 if ( ! defined( 'PAX_SUP_OPT_KEY' ) ) {

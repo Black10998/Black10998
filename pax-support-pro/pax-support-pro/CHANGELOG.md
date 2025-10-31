@@ -5,6 +5,41 @@ All notable changes to PAX Support Pro will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.2] - 2025-10-31
+
+### 🎨 Chat UI Enhancements
+
+#### Fixed
+- **Reaction Button Position** - Moved '+' reaction button below bot messages instead of to the right
+  - Prevents horizontal scrolling
+  - Better message wrapping
+  - Always visible and properly aligned
+  - Improved mobile responsiveness
+
+#### Added
+- **Custom Launcher Icon** - Upload custom chat launcher icon via settings
+  - WordPress media library integration
+  - Live preview in settings
+  - Recommended size: 48x48px
+  - Fallback to default icon if unset
+  
+- **Guest Login Modal** - Elegant modal for non-logged-in users
+  - "Login" or "Continue as Guest" options
+  - Clean overlay with blur background
+  - Session-based guest permission
+  - Admin toggle: "Allow Guest Chat" in settings
+  - Full keyboard accessibility
+
+#### Changed
+- **Reaction Button Layout** - Uses flexbox for proper positioning below messages
+- **Guest Experience** - Modal replaces redirect for better UX
+- **Settings Organization** - Added "Allow Guest Chat" toggle in General Settings
+
+### 📊 Dashboard
+- **Modern Analytics** - Dashboard already includes Chart.js analytics (verified working)
+- **Real-time Metrics** - Active tickets, pending, response rate, avg response time
+- **Card-Based Layout** - Professional stats cards with trends
+
 ## [4.0.1] - 2025-10-31
 
 ### 🔧 Maintenance & Chat UI Enhancements

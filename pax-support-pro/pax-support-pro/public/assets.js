@@ -55,35 +55,79 @@
     return;
   }
 
-  // Guest user handling - show login alert for menu button
-  if (!isLoggedIn) {
-    launcher.addEventListener('click', function (event) {
-      event.preventDefault();
-      const target = cfg.loginUrl || links.help || '/wp-login.php';
-      window.location.href = target;
-    });
-    
-    // For guests, show login alert when clicking menu button
-    if (menuBtn) {
-      menuBtn.addEventListener('click', function (event) {
-        event.preventDefault();
-        event.stopPropagation();
-        alert(strings.loginRequired || 'Please log in to use support tools.');
+  // Guest user handling
+  const allowGuestChat = opts.allow_guest_chat || false;
+  
+  if (!isLoggedIn && !allowGuestChat) {
+    // Show login modal when trying to interact
+    function showGuestLoginModal() {
+      const modal = createModalShell('pax-guest-login-modal', 'Login Required');
+      const body = modal.querySelector('.pax-modal-body');
+      const actions = modal.querySelector('.actions');
+      
+      body.innerHTML = '<p style="margin: 0 0 16px 0;">Please log in to use the support chat, or continue as a guest with limited features.</p>';
+      
+      const loginBtn = document.createElement('button');
+      loginBtn.className = 'pax-btn pax-btn-primary';
+      loginBtn.textContent = 'Login';
+      loginBtn.addEventListener('click', function() {
         const target = cfg.loginUrl || links.help || '/wp-login.php';
         window.location.href = target;
       });
+      
+      const guestBtn = document.createElement('button');
+      guestBtn.className = 'pax-btn pax-btn-secondary';
+      guestBtn.textContent = 'Continue as Guest';
+      guestBtn.addEventListener('click', function() {
+        modal.querySelector('.pax-modal-close').click();
+        // Enable chat for this session
+        sessionStorage.setItem('pax_guest_allowed', '1');
+        if (input) input.disabled = false;
+        if (sendBtn) sendBtn.disabled = false;
+      });
+      
+      actions.appendChild(guestBtn);
+      actions.appendChild(loginBtn);
+      
+      modal.open();
     }
     
-    // Disable input and send button for guests
-    if (input) {
-      input.disabled = true;
-      input.placeholder = strings.loginRequired || 'Please log in to use support tools.';
-    }
-    if (sendBtn) {
-      sendBtn.disabled = true;
-    }
+    // Check if guest was already allowed this session
+    const guestAllowed = sessionStorage.getItem('pax_guest_allowed') === '1';
     
-    return;
+    if (!guestAllowed) {
+      // Disable input and send button initially
+      if (input) {
+        input.disabled = true;
+        input.placeholder = 'Click to login or continue as guest...';
+        input.addEventListener('click', showGuestLoginModal, { once: true });
+      }
+      if (sendBtn) {
+        sendBtn.disabled = true;
+        sendBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          showGuestLoginModal();
+        });
+      }
+      
+      // Show modal when clicking launcher
+      launcher.addEventListener('click', function (event) {
+        event.preventDefault();
+        showGuestLoginModal();
+      });
+      
+      // Show modal for menu button
+      if (menuBtn) {
+        menuBtn.addEventListener('click', function (event) {
+          event.preventDefault();
+          event.stopPropagation();
+          showGuestLoginModal();
+        });
+      }
+    }
+  } else if (!isLoggedIn && allowGuestChat) {
+    // Guest chat is allowed, no restrictions
+    // Continue normally
   }
 
   function ensureToastStack() {

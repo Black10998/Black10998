@@ -87,6 +87,7 @@ function pax_sup_enqueue_public_assets() {
             'enable_speed'         => ! empty( $options['enable_speed'] ),
             'toggle_on_click'      => ! empty( $options['toggle_on_click'] ),
             'enable_offline_guard' => ! empty( $options['enable_offline_guard'] ),
+            'allow_guest_chat'     => ! empty( $options['allow_guest_chat'] ),
         ),
         'menuItems' => $menu_items,
         'rest'    => array(
@@ -161,7 +162,11 @@ function pax_sup_render_frontend_markup() {
     <div id="pax-chat-overlay"></div>
 
     <div id="pax-launcher" title="<?php echo esc_attr__( 'Support', 'pax-support-pro' ); ?>">
-        <svg viewBox="0 0 24 24"><path d="M4 3h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-6.6l-4.2 3.5a1 1 0 0 1-1.6-.8V16H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/></svg>
+        <?php if ( ! empty( $options['custom_launcher_icon'] ) ) : ?>
+            <img src="<?php echo esc_url( $options['custom_launcher_icon'] ); ?>" alt="<?php esc_attr_e( 'Support', 'pax-support-pro' ); ?>" style="width: 100%; height: 100%; object-fit: contain;">
+        <?php else : ?>
+            <svg viewBox="0 0 24 24"><path d="M4 3h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-6.6l-4.2 3.5a1 1 0 0 1-1.6-.8V16H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/></svg>
+        <?php endif; ?>
     </div>
 
     <div id="pax-chat" role="dialog" aria-modal="true" class="modal-mode">

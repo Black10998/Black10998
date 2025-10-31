@@ -781,6 +781,88 @@
     }
     
     // ============================================
+    // Custom Launcher Icon Upload
+    // ============================================
+    
+    const uploadLauncherButton = document.getElementById('upload_launcher_icon_button');
+    const removeLauncherButton = document.getElementById('remove_launcher_icon_button');
+    const launcherIconInput = document.getElementById('custom_launcher_icon');
+    const launcherIconPreview = document.getElementById('launcher_icon_preview');
+    
+    if (uploadLauncherButton) {
+        uploadLauncherButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Create WordPress media uploader
+            const mediaUploader = wp.media({
+                title: 'Select Launcher Icon',
+                button: {
+                    text: 'Use this icon'
+                },
+                multiple: false,
+                library: {
+                    type: ['image']
+                }
+            });
+            
+            // When an image is selected
+            mediaUploader.on('select', function() {
+                const attachment = mediaUploader.state().get('selection').first().toJSON();
+                
+                // Update hidden input
+                if (launcherIconInput) {
+                    launcherIconInput.value = attachment.url;
+                }
+                
+                // Update preview
+                if (launcherIconPreview) {
+                    launcherIconPreview.style.display = 'flex';
+                    launcherIconPreview.innerHTML = `
+                        <img src="${attachment.url}" style="width: 48px; height: 48px; object-fit: contain; background: var(--pax-accent); padding: 8px; border-radius: 50%;">
+                        <button type="button" id="remove_launcher_icon_button" class="pax-btn pax-btn-danger" style="padding: 4px 8px; font-size: 12px;">
+                            <span class="dashicons dashicons-no" style="font-size: 14px; width: 14px; height: 14px;"></span>
+                            Remove
+                        </button>
+                    `;
+                    
+                    // Re-attach remove button listener
+                    const newRemoveButton = document.getElementById('remove_launcher_icon_button');
+                    if (newRemoveButton) {
+                        newRemoveButton.addEventListener('click', removeLauncherIcon);
+                    }
+                }
+                
+                // Update live preview
+                updateLivePreview();
+                showSuccessMessage('Launcher icon updated');
+            });
+            
+            // Open the uploader
+            mediaUploader.open();
+        });
+    }
+    
+    function removeLauncherIcon(e) {
+        if (e) e.preventDefault();
+        
+        if (launcherIconInput) {
+            launcherIconInput.value = '';
+        }
+        
+        if (launcherIconPreview) {
+            launcherIconPreview.style.display = 'none';
+            launcherIconPreview.innerHTML = '';
+        }
+        
+        updateLivePreview();
+        showSuccessMessage('Launcher icon removed');
+    }
+    
+    if (removeLauncherButton) {
+        removeLauncherButton.addEventListener('click', removeLauncherIcon);
+    }
+    
+    // ============================================
     // Update Checker
     // ============================================
     

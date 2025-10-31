@@ -92,6 +92,24 @@ function pax_sup_render_modern_settings() {
                                 </div>
                             </div>
 
+                            <!-- Allow Guest Chat -->
+                            <div class="pax-form-group">
+                                <div style="display: flex; align-items: center; justify-content: space-between;">
+                                    <div>
+                                        <label class="pax-form-label">
+                                            <span class="dashicons dashicons-admin-users"></span>
+                                            <?php esc_html_e( 'Allow Guest Chat', 'pax-support-pro' ); ?>
+                                            <span class="pax-tooltip" data-tooltip="<?php esc_attr_e( 'Allow non-logged-in users to use chat', 'pax-support-pro' ); ?>">?</span>
+                                        </label>
+                                        <p class="pax-form-description"><?php esc_html_e( 'Allow guests to chat without logging in. If disabled, guests will see a login modal.', 'pax-support-pro' ); ?></p>
+                                    </div>
+                                    <label class="pax-toggle">
+                                        <input type="checkbox" name="allow_guest_chat" <?php checked( $options['allow_guest_chat'] ?? 0 ); ?>>
+                                        <span class="pax-toggle-slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+
                             <!-- Brand Name -->
                             <div class="pax-form-group">
                                 <label class="pax-form-label">
@@ -229,6 +247,34 @@ function pax_sup_render_modern_settings() {
                                         </div>
                                     <?php else : ?>
                                         <div id="send_icon_preview" style="display: none;"></div>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+
+                            <!-- Custom Launcher Icon -->
+                            <div class="pax-form-group">
+                                <label class="pax-form-label">
+                                    <span class="dashicons dashicons-format-chat"></span>
+                                    <?php esc_html_e( 'Custom Launcher Icon', 'pax-support-pro' ); ?>
+                                    <span class="pax-tooltip" data-tooltip="<?php esc_attr_e( 'Upload a custom icon for the chat launcher button', 'pax-support-pro' ); ?>">?</span>
+                                </label>
+                                <p class="pax-form-description"><?php esc_html_e( 'Upload a custom icon to replace the default chat launcher. Recommended size: 48x48px (PNG, SVG, or JPG).', 'pax-support-pro' ); ?></p>
+                                <div style="display: flex; align-items: center; gap: 12px; margin-top: 12px;">
+                                    <input type="hidden" name="custom_launcher_icon" id="custom_launcher_icon" value="<?php echo esc_attr( $options['custom_launcher_icon'] ?? '' ); ?>">
+                                    <button type="button" id="upload_launcher_icon_button" class="pax-btn pax-btn-secondary">
+                                        <span class="dashicons dashicons-upload"></span>
+                                        <?php esc_html_e( 'Upload Launcher Icon', 'pax-support-pro' ); ?>
+                                    </button>
+                                    <?php if ( ! empty( $options['custom_launcher_icon'] ) ) : ?>
+                                        <div id="launcher_icon_preview" style="display: flex; align-items: center; gap: 8px;">
+                                            <img src="<?php echo esc_url( $options['custom_launcher_icon'] ); ?>" style="width: 48px; height: 48px; object-fit: contain; background: var(--pax-accent); padding: 8px; border-radius: 50%;">
+                                            <button type="button" id="remove_launcher_icon_button" class="pax-btn pax-btn-danger" style="padding: 4px 8px; font-size: 12px;">
+                                                <span class="dashicons dashicons-no" style="font-size: 14px; width: 14px; height: 14px;"></span>
+                                                <?php esc_html_e( 'Remove', 'pax-support-pro' ); ?>
+                                            </button>
+                                        </div>
+                                    <?php else : ?>
+                                        <div id="launcher_icon_preview" style="display: none;"></div>
                                     <?php endif; ?>
                                 </div>
                             </div>
