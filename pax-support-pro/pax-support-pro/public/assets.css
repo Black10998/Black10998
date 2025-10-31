@@ -383,12 +383,30 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pax-send:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(229, 57, 53, 0.4);
+}
+
+.pax-send:active {
+  transform: scale(0.95);
 }
 
 .pax-send svg {
   width: 18px;
   height: 18px;
   fill: #fff;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+}
+
+.pax-send img {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
 }
 
 .pax-typing {
@@ -1069,41 +1087,38 @@ html.pax-speed #pax-launcher {
   transform: scale(1.02);
 }
 
-/* Reaction Button */
+/* Reaction Button - Always Visible */
 .pax-reaction-btn {
   position: absolute;
-  right: -8px;
+  right: -32px;
   top: 50%;
   transform: translateY(-50%);
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
-  background: rgba(20, 20, 40, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: var(--pax-reaction-bg, rgba(229, 57, 53, 0.9));
+  border: 1px solid var(--pax-reaction-border, rgba(229, 57, 53, 0.5));
   color: var(--pax-text, #e8eaf0);
-  font-size: 16px;
+  font-size: 18px;
+  font-weight: 600;
   line-height: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  opacity: 0;
+  opacity: 1;
   transition: all 0.2s ease;
   backdrop-filter: blur(10px);
   padding: 0;
   z-index: 10;
-}
-
-.pax-msg.bot:hover .pax-reaction-btn {
-  opacity: 1;
-  right: -32px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .pax-reaction-btn:hover {
-  background: rgba(229, 57, 53, 0.9);
-  border-color: rgba(229, 57, 53, 0.5);
+  background: var(--pax-reaction-bg-hover, rgba(229, 57, 53, 1));
+  border-color: var(--pax-reaction-border-hover, rgba(229, 57, 53, 0.7));
   transform: translateY(-50%) scale(1.15);
-  box-shadow: 0 4px 12px rgba(229, 57, 53, 0.4);
+  box-shadow: 0 4px 16px rgba(229, 57, 53, 0.5);
 }
 
 .pax-reaction-btn:active {
@@ -1228,8 +1243,11 @@ html.pax-speed #pax-launcher {
     font-size: 18px;
   }
   
-  .pax-msg.bot:hover .pax-reaction-btn {
+  .pax-reaction-btn {
     right: -28px;
+    width: 26px;
+    height: 26px;
+    font-size: 16px;
   }
 }
 }

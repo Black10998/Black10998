@@ -34,13 +34,20 @@ function pax_sup_enqueue_public_assets() {
     wp_enqueue_script( 'pax-support-pro', PAX_SUP_URL . 'public/assets.js', array(), PAX_SUP_VER, true );
 
     $position = $options['launcher_position'];
+    $reaction_color = ! empty( $options['reaction_btn_color'] ) ? $options['reaction_btn_color'] : '#e53935';
+    $reaction_rgb = sscanf( $reaction_color, '#%02x%02x%02x' );
+    
     $css      = ':root{' .
         '--pax-bg:' . esc_html( $options['color_bg'] ) . ';' .
         '--pax-panel:' . esc_html( $options['color_panel'] ) . ';' .
         '--pax-border:' . esc_html( $options['color_border'] ) . ';' .
         '--pax-text:' . esc_html( $options['color_text'] ) . ';' .
         '--pax-sub:' . esc_html( $options['color_sub'] ) . ';' .
-        '--pax-accent:' . esc_html( $options['color_accent'] ) . ';';
+        '--pax-accent:' . esc_html( $options['color_accent'] ) . ';' .
+        '--pax-reaction-bg:rgba(' . implode( ',', $reaction_rgb ) . ',0.9);' .
+        '--pax-reaction-bg-hover:' . esc_html( $reaction_color ) . ';' .
+        '--pax-reaction-border:rgba(' . implode( ',', $reaction_rgb ) . ',0.5);' .
+        '--pax-reaction-border-hover:rgba(' . implode( ',', $reaction_rgb ) . ',0.7);';
 
     switch ( $position ) {
         case 'bottom-left':
@@ -206,7 +213,13 @@ function pax_sup_render_frontend_markup() {
         <div id="pax-log" class="pax-log"></div>
         <div id="pax-input" class="pax-input">
             <input id="pax-in" type="text" placeholder="<?php esc_attr_e( 'Type your message...', 'pax-support-pro' ); ?>">
-            <button id="pax-send" type="button"><svg viewBox="0 0 24 24"><path d="M2.01 21 23 12 2.01 3 2 10l15 2-15 2z"/></svg></button>
+            <button id="pax-send" type="button">
+                <?php if ( ! empty( $options['custom_send_icon'] ) ) : ?>
+                    <img src="<?php echo esc_url( $options['custom_send_icon'] ); ?>" alt="Send" style="width: 18px; height: 18px; object-fit: contain;">
+                <?php else : ?>
+                    <svg viewBox="0 0 24 24"><path d="M2.01 21 23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                <?php endif; ?>
+            </button>
         </div>
     </div>
     <?php

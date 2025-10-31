@@ -5,6 +5,26 @@ All notable changes to PAX Support Pro will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.1] - 2025-10-31
+
+### 🔧 Maintenance & Chat UI Enhancements
+
+#### Fixed
+- **Update System** - Fixed Plugin Update Checker integration for proper "Update Now" display in WordPress plugin list
+- **Update Checker** - Improved GitHub release detection and fallback to latest commit
+
+#### Added
+- **Manual Update Check** - Added "Check for Updates" button in admin settings page
+- **Chat UI Enhancement** - Made '+' reaction button always visible (no longer requires hover)
+- **Custom Send Icon** - Added ability to upload custom send icon in settings
+- **Reaction Button Color** - Added color picker for reaction button customization
+- **Live Preview Sync** - All chat customization changes now sync to live preview in real-time
+
+#### Changed
+- **Reaction Button** - Changed from hover-only to always visible for better UX
+- **Send Icon** - Restored visible send arrow icon with metallic styling
+- **Settings UI** - Enhanced chat customization section with new controls
+
 ## [4.0.0] - 2025-10-31
 
 ### 🎉 Major Release - Complete Admin UI Modernization

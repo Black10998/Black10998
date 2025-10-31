@@ -372,6 +372,8 @@ function pax_sup_render_settings() {
             'color_border'         => sanitize_hex_color( $input['color_border'] ?? '#2a2d33' ),
             'color_text'           => sanitize_hex_color( $input['color_text'] ?? '#e8eaf0' ),
             'color_sub'            => sanitize_hex_color( $input['color_sub'] ?? '#9aa0a8' ),
+            'reaction_btn_color'   => sanitize_hex_color( $input['reaction_btn_color'] ?? '#e53935' ),
+            'custom_send_icon'     => esc_url_raw( $input['custom_send_icon'] ?? '' ),
             'live_agent_email'     => sanitize_email( $input['live_agent_email'] ?? get_option( 'admin_email' ) ),
             'callback_enabled'     => ! empty( $input['callback_enabled'] ) ? 1 : 0,
             'help_center_url'      => esc_url_raw( $input['help_center_url'] ?? home_url( '/help/' ) ),

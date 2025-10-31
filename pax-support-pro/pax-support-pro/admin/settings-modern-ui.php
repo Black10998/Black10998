@@ -181,6 +181,57 @@ function pax_sup_render_modern_settings() {
                                     <input type="color" name="color_text" value="<?php echo esc_attr( $options['color_text'] ); ?>" class="pax-color-input">
                                 </div>
                             </div>
+
+                            <!-- Reaction Button Color -->
+                            <div class="pax-form-group">
+                                <label class="pax-form-label">
+                                    <span class="dashicons dashicons-smiley"></span>
+                                    <?php esc_html_e( 'Reaction Button Color', 'pax-support-pro' ); ?>
+                                    <span class="pax-tooltip" data-tooltip="<?php esc_attr_e( 'Color for the chat reaction button (+)', 'pax-support-pro' ); ?>">?</span>
+                                </label>
+                                <p class="pax-form-description"><?php esc_html_e( 'Customize the color of the reaction button that appears on bot messages.', 'pax-support-pro' ); ?></p>
+                                <div class="pax-color-picker-wrapper">
+                                    <div class="pax-color-preview" style="background: <?php echo esc_attr( $options['reaction_btn_color'] ?? '#e53935' ); ?>"></div>
+                                    <input type="color" name="reaction_btn_color" value="<?php echo esc_attr( $options['reaction_btn_color'] ?? '#e53935' ); ?>" class="pax-color-input">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chat Customization Card -->
+                    <div class="pax-card">
+                        <div class="pax-card-header">
+                            <span class="dashicons dashicons-format-chat"></span>
+                            <h2><?php esc_html_e( 'Chat Customization', 'pax-support-pro' ); ?></h2>
+                        </div>
+                        <div class="pax-card-body">
+                            <!-- Custom Send Icon -->
+                            <div class="pax-form-group">
+                                <label class="pax-form-label">
+                                    <span class="dashicons dashicons-upload"></span>
+                                    <?php esc_html_e( 'Custom Send Icon', 'pax-support-pro' ); ?>
+                                    <span class="pax-tooltip" data-tooltip="<?php esc_attr_e( 'Upload a custom icon for the send button', 'pax-support-pro' ); ?>">?</span>
+                                </label>
+                                <p class="pax-form-description"><?php esc_html_e( 'Upload a custom icon to replace the default send arrow. Recommended size: 24x24px (PNG, SVG, or JPG).', 'pax-support-pro' ); ?></p>
+                                <div style="display: flex; align-items: center; gap: 12px; margin-top: 12px;">
+                                    <input type="hidden" name="custom_send_icon" id="custom_send_icon" value="<?php echo esc_attr( $options['custom_send_icon'] ?? '' ); ?>">
+                                    <button type="button" id="upload_send_icon_button" class="pax-btn pax-btn-secondary">
+                                        <span class="dashicons dashicons-upload"></span>
+                                        <?php esc_html_e( 'Upload Icon', 'pax-support-pro' ); ?>
+                                    </button>
+                                    <?php if ( ! empty( $options['custom_send_icon'] ) ) : ?>
+                                        <div id="send_icon_preview" style="display: flex; align-items: center; gap: 8px;">
+                                            <img src="<?php echo esc_url( $options['custom_send_icon'] ); ?>" style="width: 32px; height: 32px; object-fit: contain; background: var(--pax-accent); padding: 6px; border-radius: 6px;">
+                                            <button type="button" id="remove_send_icon_button" class="pax-btn pax-btn-danger" style="padding: 4px 8px; font-size: 12px;">
+                                                <span class="dashicons dashicons-no" style="font-size: 14px; width: 14px; height: 14px;"></span>
+                                                <?php esc_html_e( 'Remove', 'pax-support-pro' ); ?>
+                                            </button>
+                                        </div>
+                                    <?php else : ?>
+                                        <div id="send_icon_preview" style="display: none;"></div>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -295,6 +346,64 @@ function pax_sup_render_modern_settings() {
                                     </div>
                                     <input type="range" name="ticket_cooldown_days" min="0" max="30" step="1" value="<?php echo intval( $options['ticket_cooldown_days'] ); ?>" class="pax-range-slider" data-unit=" days">
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- System & Maintenance -->
+                    <div class="pax-card">
+                        <div class="pax-card-header">
+                            <span class="dashicons dashicons-admin-tools"></span>
+                            <h2><?php esc_html_e( 'System & Maintenance', 'pax-support-pro' ); ?></h2>
+                        </div>
+                        <div class="pax-card-body">
+                            <!-- Plugin Updates -->
+                            <div class="pax-form-group">
+                                <label class="pax-form-label">
+                                    <span class="dashicons dashicons-update"></span>
+                                    <?php esc_html_e( 'Plugin Updates', 'pax-support-pro' ); ?>
+                                    <span class="pax-tooltip" data-tooltip="<?php esc_attr_e( 'Check for and install plugin updates from GitHub', 'pax-support-pro' ); ?>">?</span>
+                                </label>
+                                <p class="pax-form-description"><?php esc_html_e( 'Current version:', 'pax-support-pro' ); ?> <strong><?php echo esc_html( PAX_SUP_VER ); ?></strong></p>
+                                <div style="margin-top: 12px;">
+                                    <button type="button" id="pax-check-updates" class="pax-btn pax-btn-secondary">
+                                        <span class="dashicons dashicons-update"></span>
+                                        <?php esc_html_e( 'Check for Updates', 'pax-support-pro' ); ?>
+                                    </button>
+                                    <span id="pax-update-status" style="margin-left: 12px; display: none;"></span>
+                                </div>
+                                <div id="pax-update-info" style="margin-top: 12px; display: none;"></div>
+                            </div>
+
+                            <!-- Auto Update Settings -->
+                            <div class="pax-form-group">
+                                <div style="display: flex; align-items: center; justify-content: space-between;">
+                                    <div>
+                                        <label class="pax-form-label">
+                                            <span class="dashicons dashicons-update-alt"></span>
+                                            <?php esc_html_e( 'Auto Update', 'pax-support-pro' ); ?>
+                                            <span class="pax-tooltip" data-tooltip="<?php esc_attr_e( 'Automatically check for updates in the background', 'pax-support-pro' ); ?>">?</span>
+                                        </label>
+                                        <p class="pax-form-description"><?php esc_html_e( 'Enable automatic background update checks.', 'pax-support-pro' ); ?></p>
+                                    </div>
+                                    <label class="pax-toggle">
+                                        <input type="checkbox" name="auto_update_enabled" <?php checked( $options['auto_update_enabled'] ); ?>>
+                                        <span class="pax-toggle-slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Update Check Frequency -->
+                            <div class="pax-form-group">
+                                <label class="pax-form-label">
+                                    <span class="dashicons dashicons-clock"></span>
+                                    <?php esc_html_e( 'Update Check Frequency', 'pax-support-pro' ); ?>
+                                    <span class="pax-tooltip" data-tooltip="<?php esc_attr_e( 'How often to check for updates automatically', 'pax-support-pro' ); ?>">?</span>
+                                </label>
+                                <select name="update_check_frequency" class="pax-select">
+                                    <option value="daily" <?php selected( $options['update_check_frequency'] ?? 'daily', 'daily' ); ?>><?php esc_html_e( 'Daily', 'pax-support-pro' ); ?></option>
+                                    <option value="weekly" <?php selected( $options['update_check_frequency'] ?? 'daily', 'weekly' ); ?>><?php esc_html_e( 'Weekly', 'pax-support-pro' ); ?></option>
+                                </select>
                             </div>
                         </div>
                     </div>

@@ -127,6 +127,7 @@
         const colorPanel = document.querySelector('[name="color_panel"]')?.value || '#121418';
         const colorBorder = document.querySelector('[name="color_border"]')?.value || '#2a2d33';
         const colorText = document.querySelector('[name="color_text"]')?.value || '#e8eaf0';
+        const reactionColor = document.querySelector('[name="reaction_btn_color"]')?.value || '#e53935';
         
         // Get form values - Toggles
         const enabled = document.querySelector('[name="enabled"]')?.checked ?? true;
@@ -136,17 +137,33 @@
         // Get form values - Text
         const brandName = document.querySelector('[name="brand_name"]')?.value || 'PAX SUPPORT';
         
+        // Get custom send icon
+        const customSendIcon = document.querySelector('[name="custom_send_icon"]')?.value || '';
+        
         // Apply colors to preview with smooth transition
         preview.style.setProperty('--preview-accent', colorAccent);
         preview.style.setProperty('--preview-bg', colorBg);
         preview.style.setProperty('--preview-panel', colorPanel);
         preview.style.setProperty('--preview-border', colorBorder);
         preview.style.setProperty('--preview-text', colorText);
+        preview.style.setProperty('--preview-reaction', reactionColor);
         
         // Update brand name in preview
         const previewTitle = preview.querySelector('.pax-preview-title');
         if (previewTitle) {
             previewTitle.textContent = brandName;
+        }
+        
+        // Update send button icon in preview
+        const previewButton = preview.querySelector('.pax-preview-button');
+        if (previewButton && customSendIcon) {
+            // Add visual indicator that custom icon is set
+            previewButton.style.backgroundImage = `url(${customSendIcon})`;
+            previewButton.style.backgroundSize = '18px 18px';
+            previewButton.style.backgroundPosition = 'center';
+            previewButton.style.backgroundRepeat = 'no-repeat';
+        } else if (previewButton) {
+            previewButton.style.backgroundImage = 'none';
         }
         
         // Update preview visibility based on toggles
@@ -680,6 +697,214 @@
             }
         }
     }
+    
+    // ============================================
+    // Custom Send Icon Upload
+    // ============================================
+    
+    const uploadButton = document.getElementById('upload_send_icon_button');
+    const removeButton = document.getElementById('remove_send_icon_button');
+    const iconInput = document.getElementById('custom_send_icon');
+    const iconPreview = document.getElementById('send_icon_preview');
+    
+    if (uploadButton) {
+        uploadButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Create WordPress media uploader
+            const mediaUploader = wp.media({
+                title: 'Select Send Icon',
+                button: {
+                    text: 'Use this icon'
+                },
+                multiple: false,
+                library: {
+                    type: ['image']
+                }
+            });
+            
+            // When an image is selected
+            mediaUploader.on('select', function() {
+                const attachment = mediaUploader.state().get('selection').first().toJSON();
+                
+                // Update hidden input
+                if (iconInput) {
+                    iconInput.value = attachment.url;
+                }
+                
+                // Update preview
+                if (iconPreview) {
+                    iconPreview.style.display = 'flex';
+                    iconPreview.innerHTML = `
+                        <img src="${attachment.url}" style="width: 32px; height: 32px; object-fit: contain; background: var(--pax-accent); padding: 6px; border-radius: 6px;">
+                        <button type="button" id="remove_send_icon_button" class="pax-btn pax-btn-danger" style="padding: 4px 8px; font-size: 12px;">
+                            <span class="dashicons dashicons-no" style="font-size: 14px; width: 14px; height: 14px;"></span>
+                            Remove
+                        </button>
+                    `;
+                    
+                    // Re-attach remove button listener
+                    const newRemoveButton = document.getElementById('remove_send_icon_button');
+                    if (newRemoveButton) {
+                        newRemoveButton.addEventListener('click', removeSendIcon);
+                    }
+                }
+                
+                // Update live preview
+                updateLivePreview();
+                showSuccessMessage('Send icon updated');
+            });
+            
+            // Open the uploader
+            mediaUploader.open();
+        });
+    }
+    
+    function removeSendIcon(e) {
+        if (e) e.preventDefault();
+        
+        if (iconInput) {
+            iconInput.value = '';
+        }
+        
+        if (iconPreview) {
+            iconPreview.style.display = 'none';
+            iconPreview.innerHTML = '';
+        }
+        
+        updateLivePreview();
+        showSuccessMessage('Send icon removed');
+    }
+    
+    if (removeButton) {
+        removeButton.addEventListener('click', removeSendIcon);
+    }
+    
+    // ============================================
+    // Update Checker
+    // ============================================
+    
+    const checkUpdatesBtn = document.getElementById('pax-check-updates');
+    const updateStatus = document.getElementById('pax-update-status');
+    const updateInfo = document.getElementById('pax-update-info');
+    
+    if (checkUpdatesBtn) {
+        checkUpdatesBtn.addEventListener('click', async function() {
+            // Disable button and show loading
+            checkUpdatesBtn.disabled = true;
+            checkUpdatesBtn.innerHTML = '<span class="dashicons dashicons-update spin"></span> Checking...';
+            
+            if (updateStatus) {
+                updateStatus.style.display = 'inline';
+                updateStatus.textContent = 'Checking for updates...';
+                updateStatus.className = '';
+            }
+            
+            if (updateInfo) {
+                updateInfo.style.display = 'none';
+                updateInfo.innerHTML = '';
+            }
+            
+            try {
+                const response = await fetch(ajaxurl.replace('admin-ajax.php', 'wp-json/pax/v1/check-updates'), {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-WP-Nonce': document.querySelector('[name="_wpnonce"]')?.value || ''
+                    },
+                    credentials: 'same-origin'
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to check for updates');
+                }
+                
+                const data = await response.json();
+                
+                // Update status
+                if (updateStatus) {
+                    updateStatus.style.display = 'inline';
+                    if (data.has_update) {
+                        updateStatus.innerHTML = '<span style="color: #e53935;">⚠️ Update available!</span>';
+                    } else {
+                        updateStatus.innerHTML = '<span style="color: #4caf50;">✅ Up to date</span>';
+                    }
+                }
+                
+                // Show update info
+                if (updateInfo && data.has_update) {
+                    updateInfo.style.display = 'block';
+                    updateInfo.innerHTML = `
+                        <div style="padding: 16px; background: rgba(229, 57, 53, 0.1); border: 1px solid rgba(229, 57, 53, 0.3); border-radius: 8px; margin-top: 12px;">
+                            <h4 style="margin: 0 0 8px 0; color: #e53935;">
+                                <span class="dashicons dashicons-info"></span>
+                                Update Available: ${data.latest_version}
+                            </h4>
+                            <p style="margin: 0 0 12px 0; color: #9aa0a8;">
+                                ${data.message}
+                            </p>
+                            <a href="${window.location.origin}/wp-admin/plugins.php" class="pax-btn pax-btn-primary" style="display: inline-block;">
+                                <span class="dashicons dashicons-download"></span>
+                                Go to Plugins Page to Update
+                            </a>
+                        </div>
+                    `;
+                } else if (updateInfo && !data.has_update) {
+                    updateInfo.style.display = 'block';
+                    updateInfo.innerHTML = `
+                        <div style="padding: 16px; background: rgba(76, 175, 80, 0.1); border: 1px solid rgba(76, 175, 80, 0.3); border-radius: 8px; margin-top: 12px;">
+                            <p style="margin: 0; color: #4caf50;">
+                                <span class="dashicons dashicons-yes-alt"></span>
+                                ${data.message}
+                            </p>
+                        </div>
+                    `;
+                }
+                
+                showSuccessMessage('Update check completed');
+                
+            } catch (error) {
+                console.error('Update check error:', error);
+                
+                if (updateStatus) {
+                    updateStatus.style.display = 'inline';
+                    updateStatus.innerHTML = '<span style="color: #e53935;">❌ Check failed</span>';
+                }
+                
+                if (updateInfo) {
+                    updateInfo.style.display = 'block';
+                    updateInfo.innerHTML = `
+                        <div style="padding: 16px; background: rgba(229, 57, 53, 0.1); border: 1px solid rgba(229, 57, 53, 0.3); border-radius: 8px; margin-top: 12px;">
+                            <p style="margin: 0; color: #e53935;">
+                                <span class="dashicons dashicons-warning"></span>
+                                Failed to check for updates. Please try again later.
+                            </p>
+                        </div>
+                    `;
+                }
+                
+                showErrorMessage('Failed to check for updates');
+            } finally {
+                // Re-enable button
+                checkUpdatesBtn.disabled = false;
+                checkUpdatesBtn.innerHTML = '<span class="dashicons dashicons-update"></span> Check for Updates';
+            }
+        });
+    }
+    
+    // Add spin animation for loading spinner
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .spin {
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+    `;
+    document.head.appendChild(style);
     
     // Export for external use
     window.paxSettings = {

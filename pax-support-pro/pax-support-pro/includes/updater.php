@@ -45,6 +45,57 @@ class PAX_Support_Pro_Updater {
         add_filter( 'upgrader_post_install', array( $this, 'cleanup_after_install' ), 10, 3 );
         add_action( 'upgrader_process_complete', array( $this, 'after_update_complete' ), 10, 2 );
         add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_update_modal_assets' ) );
+        add_action( 'rest_api_init', array( $this, 'register_rest_routes' ) );
+    }
+
+    /**
+     * Register REST API routes for manual update checks
+     */
+    public function register_rest_routes() {
+        register_rest_route(
+            PAX_SUP_REST_NS,
+            '/check-updates',
+            array(
+                'methods'             => 'POST',
+                'callback'            => array( $this, 'rest_check_updates' ),
+                'permission_callback' => function() {
+                    return current_user_can( 'update_plugins' );
+                },
+            )
+        );
+    }
+
+    /**
+     * REST endpoint to manually check for updates
+     */
+    public function rest_check_updates( $request ) {
+        $release = $this->force_check_updates();
+        
+        if ( empty( $release['version'] ) ) {
+            return new WP_Error(
+                'no_update_info',
+                __( 'Unable to retrieve update information from GitHub.', 'pax-support-pro' ),
+                array( 'status' => 500 )
+            );
+        }
+
+        $has_update = version_compare( PAX_SUP_VER, $release['version'], '<' );
+
+        return rest_ensure_response( array(
+            'success'        => true,
+            'current_version' => PAX_SUP_VER,
+            'latest_version'  => $release['version'],
+            'has_update'      => $has_update,
+            'release_url'     => $release['url'],
+            'changelog'       => ! empty( $release['body'] ) ? $release['body'] : '',
+            'message'         => $has_update 
+                ? sprintf( 
+                    __( 'Update available: %s → %s', 'pax-support-pro' ),
+                    PAX_SUP_VER,
+                    $release['version']
+                )
+                : __( 'You are running the latest version.', 'pax-support-pro' ),
+        ) );
     }
 
     public function maybe_schedule_checks() {
