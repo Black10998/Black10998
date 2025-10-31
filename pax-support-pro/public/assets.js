@@ -490,6 +490,27 @@
     }
   });
 
+  // Safe closest() helper to protect against broken overrides
+  function safeClosest(element, selector) {
+    if (!element) return null;
+    if (typeof element.closest === 'function') {
+      try {
+        return element.closest(selector);
+      } catch (e) {
+        // Fallback if closest() is broken
+      }
+    }
+    // Manual traversal fallback
+    let current = element;
+    while (current && current !== document) {
+      if (current.matches && current.matches(selector)) {
+        return current;
+      }
+      current = current.parentElement;
+    }
+    return null;
+  }
+
   if (menuBtn && menu) {
     menuBtn.addEventListener('click', function (event) {
       event.preventDefault();
@@ -1496,7 +1517,7 @@
     });
 
     wrap.addEventListener('click', function (event) {
-      const button = event.target.closest('button');
+      const button = safeClosest(event.target, 'button');
       if (!button) {
         return;
       }
@@ -1718,7 +1739,7 @@
 
   if (menu) {
     menu.addEventListener('click', function (event) {
-      const item = event.target.closest('.pax-item');
+      const item = safeClosest(event.target, '.pax-item');
       if (!item) {
         return;
       }
