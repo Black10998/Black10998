@@ -5,6 +5,23 @@ All notable changes to PAX Support Pro will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.5] - 2025-11-01
+
+### 🐛 Bug Fixes
+
+#### Fixed
+- **Removed deprecated method calls** - Cleaned up plugin-update-checker integration
+  - Removed `getCheckPeriod()` call (automatic in v5.6)
+  - Removed `getUpdate()` call (deprecated in v5.6)
+  - Updated diagnostics to use supported methods only
+  - All PHP syntax errors resolved
+
+#### Changed
+- **Simplified diagnostics output** - Removed fields that are managed automatically
+  - Check period now handled by library
+  - Update info retrieved through proper channels
+  - Cleaner, more maintainable code
+
 ## [4.0.4] - 2025-11-01
 
 ### 🔄 Update System Migration

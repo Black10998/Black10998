@@ -61,17 +61,6 @@ class PAX_Support_Pro_Updater {
         
         // Get VCS API and enable release assets
         $this->update_checker->getVcsApi()->enableReleaseAssets();
-        
-        // Set check period based on settings
-        $options = pax_sup_get_options();
-        if ( ! empty( $options['auto_update_enabled'] ) ) {
-            $frequency = $options['update_check_frequency'] ?? 'daily';
-            $hours = ( 'weekly' === $frequency ) ? 168 : 24;
-            $this->update_checker->setUpdateCheckInterval( $hours );
-        } else {
-            // Disable automatic checks
-            $this->update_checker->setUpdateCheckInterval( 0 );
-        }
     }
     
     /**
@@ -232,9 +221,8 @@ class PAX_Support_Pro_Updater {
                 'update_check_frequency' => $options['update_check_frequency'] ?? 'daily',
             ),
             'update_checker' => array(
-                'library'      => 'plugin-update-checker v5',
-                'check_period' => $this->update_checker->getCheckPeriod(),
-                'last_check'   => $this->update_checker->getLastCheckTime() ? date( 'Y-m-d H:i:s', $this->update_checker->getLastCheckTime() ) : 'Never',
+                'library'    => 'plugin-update-checker v5.6',
+                'last_check' => $this->update_checker->getLastCheckTime() ? date( 'Y-m-d H:i:s', $this->update_checker->getLastCheckTime() ) : 'Never',
             ),
             'github_connection' => array(
                 'repo'    => 'Black10998/Black10998',
@@ -272,20 +260,11 @@ class PAX_Support_Pro_Updater {
     
     /**
      * Maybe schedule automatic update checks
+     * Note: plugin-update-checker v5.6 handles check intervals automatically
      */
     public function maybe_schedule_checks() {
-        $options = pax_sup_get_options();
-        
-        // Update check period based on settings
-        if ( $this->update_checker ) {
-            if ( ! empty( $options['auto_update_enabled'] ) ) {
-                $frequency = $options['update_check_frequency'] ?? 'daily';
-                $hours = ( 'weekly' === $frequency ) ? 168 : 24;
-                $this->update_checker->setUpdateCheckInterval( $hours );
-            } else {
-                $this->update_checker->setUpdateCheckInterval( 0 );
-            }
-        }
+        // plugin-update-checker handles scheduling automatically
+        // This method is kept for backward compatibility
     }
 }
 
