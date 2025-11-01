@@ -67,10 +67,10 @@ class PAX_Support_Pro_Updater {
         if ( ! empty( $options['auto_update_enabled'] ) ) {
             $frequency = $options['update_check_frequency'] ?? 'daily';
             $hours = ( 'weekly' === $frequency ) ? 168 : 24;
-            $this->update_checker->setCheckPeriod( $hours );
+            $this->update_checker->setUpdateCheckInterval( $hours );
         } else {
             // Disable automatic checks
-            $this->update_checker->setCheckPeriod( 0 );
+            $this->update_checker->setUpdateCheckInterval( 0 );
         }
     }
     
@@ -281,9 +281,9 @@ class PAX_Support_Pro_Updater {
             if ( ! empty( $options['auto_update_enabled'] ) ) {
                 $frequency = $options['update_check_frequency'] ?? 'daily';
                 $hours = ( 'weekly' === $frequency ) ? 168 : 24;
-                $this->update_checker->setCheckPeriod( $hours );
+                $this->update_checker->setUpdateCheckInterval( $hours );
             } else {
-                $this->update_checker->setCheckPeriod( 0 );
+                $this->update_checker->setUpdateCheckInterval( 0 );
             }
         }
     }
