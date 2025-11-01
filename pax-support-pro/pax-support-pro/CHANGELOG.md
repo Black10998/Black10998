@@ -5,6 +5,38 @@ All notable changes to PAX Support Pro will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.4] - 2025-11-01
+
+### 🔄 Update System Migration
+
+#### Changed
+- **Migrated to plugin-update-checker v5** - Switched from custom updater to industry-standard library
+  - More reliable update detection
+  - Better WordPress integration
+  - Automatic release asset handling
+  - Improved caching mechanism
+
+#### Added
+- **plugin-update-checker Library** - Official YahnisElsts library integrated
+  - Version 5.x (latest)
+  - GitHub VCS API support
+  - Release assets enabled
+  - Configurable check periods
+
+#### Maintained
+- **All Existing Features** - No functionality lost in migration
+  - CheckOptData folder still used
+  - Manual "Check for Updates" button works
+  - Update diagnostics endpoint functional
+  - Auto-update toggle still works
+  - Settings integration preserved
+
+#### Technical
+- Library location: `/plugin-update-checker/`
+- Uses PucFactory for initialization
+- Configurable check period (24h daily, 168h weekly)
+- Maintains backward compatibility
+
 ## [4.0.3] - 2025-10-31
 
 ### 🔧 Update System Enhancements
